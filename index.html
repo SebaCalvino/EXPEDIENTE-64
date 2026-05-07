@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EXPEDIENTE 64 — El caso del dióxido de azufre. Sitio educativo interactivo sobre el SO₂.">
+  <title>EXPEDIENTE 64 — El caso del dióxido de azufre</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/sections.css">
+  <link rel="stylesheet" href="styles/games.css">
+  <link rel="stylesheet" href="styles/animations.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+  <!-- Loading screen -->
+  <div class="loader" id="loader">
+    <div class="envelope">
+      <div class="envelope-flap"></div>
+      <div class="envelope-content">
+        <div>EXPEDIENTE</div>
+        <div class="num">N° 64</div>
+        <div class="lab">CONFIDENCIAL</div>
+      </div>
+    </div>
+    <div class="loader-text">ABRIENDO CASO…</div>
+  </div>
+
+  <!-- Film grain overlay -->
+  <div class="film-grain"></div>
+
+  <!-- Confetti canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top nav -->
+  <nav class="nav">
+    <div class="nav-brand">EXPEDIENTE <span class="num">64</span></div>
+    <button class="hamburger" aria-label="Menú"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="#sospechosa">Sospechosa</a></li>
+      <li><a href="#antecedentes">Antecedentes</a></li>
+      <li><a href="#expediente">Expediente</a></li>
+      <li><a href="#videos">Videos</a></li>
+      <li><a href="#mapa">Mapa</a></li>
+      <li><a href="#juicio">Juicio</a></li>
+      <li><a href="#juegos">Juegos</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- ============== SECTION 1: HERO ============== -->
+    <section class="hero" id="hero">
+      <div class="hero-layer back" data-parallax="0.15"></div>
+      <div class="hero-layer smoke" data-parallax="0.3"></div>
+      <div class="hero-layer canvas-layer" data-parallax="0.5">
+        <canvas id="hero-canvas"></canvas>
+      </div>
+      <div class="hero-stamp">TOP SECRET</div>
+
+      <div class="hero-content">
+        <h1 class="hero-title">EXPEDIENTE <span class="num">64</span></h1>
+        <p class="hero-subtitle">El caso del dióxido de azufre</p>
+        <p class="hero-slogan" id="slogan-text"></p>
+        <div class="hero-badges">
+          <div class="case-stamp" data-stamp-egg>CASO ABIERTO • DESDE 1952</div>
+        </div>
+        <div class="hero-cta">
+          <a href="#sospechosa" class="btn">ABRIR EXPEDIENTE <span class="cta-chevron">▼</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 2: SUSPECT ============== -->
+    <section class="section suspect" id="sospechosa">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 1</div>
+        <h2 class="section-title">La <em>sospechosa</em></h2>
+        <p class="section-lead">Antes de juzgar, hay que conocer. Identificación detallada de la molécula central de este caso.</p>
+
+        <div class="suspect-grid reveal">
+          <div class="suspect-3d">
+            <canvas id="suspect-canvas"></canvas>
+          </div>
+
+          <div class="dossier-card">
+            <div class="dossier-header">FICHA DE IDENTIFICACIÓN</div>
+            <ul class="dossier-list">
+              <li><strong>Nombre:</strong> <span>Dióxido de azufre</span></li>
+              <li><strong>Alias:</strong> <span>Anhídrido sulfuroso</span></li>
+              <li><strong>Fórmula:</strong> <span>SO₂</span></li>
+              <li><strong>Masa molar:</strong> <span>64 g/mol</span></li>
+              <li><strong>Geometría:</strong> <span><span class="gloss" data-term="geometría angular">angular (~119°)</span></span></li>
+              <li><strong>Polaridad:</strong> <span><span class="gloss" data-term="polaridad">polar</span> (μ ≈ 1,63 D)</span></li>
+              <li><strong>Aparición:</strong> <span>industrias y volcanes</span></li>
+              <li><strong>Señas:</strong> <span>gas incoloro, olor pungente</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tabs reveal">
+          <ul class="tab-list">
+            <li><button class="tab-btn" data-target="tab-lewis" aria-selected="true">Estructura de Lewis</button></li>
+            <li><button class="tab-btn" data-target="tab-polar" aria-selected="false">Polaridad</button></li>
+            <li><button class="tab-btn" data-target="tab-fim" aria-selected="false">Fuerzas intermoleculares</button></li>
+          </ul>
+          <div class="tab-panel active" id="tab-lewis">
+            <p>La molécula de SO₂ presenta <span class="gloss" data-term="par libre">un par libre</span> sobre el azufre y un par de enlaces que oscilan por <strong>resonancia</strong> entre una forma con doble enlace S=O / simple S–O y su imagen especular. Esta deslocalización electrónica explica que ambos enlaces tengan, en la práctica, longitudes idénticas (~143 pm).</p>
+          </div>
+          <div class="tab-panel" id="tab-polar">
+            <p>La <span class="gloss" data-term="electronegatividad">diferencia de electronegatividad</span> entre O (3,44) y S (2,58) es de ~0,86: enlaces covalentes polares. La <span class="gloss" data-term="geometría angular">geometría angular</span> impide que los <span class="gloss" data-term="dipolo">dipolos</span> se cancelen — el resultado es una molécula con momento dipolar neto de 1,63 D.</p>
+          </div>
+          <div class="tab-panel" id="tab-fim">
+            <p>Las <span class="gloss" data-term="fuerzas intermoleculares">fuerzas intermoleculares</span> presentes son dipolo-dipolo (por ser polar) y dispersión de London. No hay puentes de hidrógeno (no hay H unido a F, O o N). Esto explica un punto de ebullición notablemente alto (–10 °C) para una molécula tan pequeña.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 3: TIMELINE ============== -->
+    <section class="section timeline" id="antecedentes">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 2</div>
+        <h2 class="section-title">Antecedentes <em>del caso</em></h2>
+        <p class="section-lead">Línea de tiempo: hechos documentados, fechas verificadas. Cada polaroid es una pista.</p>
+        <div class="timeline-track" id="timeline-track"></div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 4: FOLDER (Expediente completo) ============== -->
+    <section class="section folder" id="expediente">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 3</div>
+        <h2 class="section-title">El <em>expediente</em> completo</h2>
+        <p class="section-lead">Siete legajos clasificados con la información química, ambiental y social del caso.</p>
+
+        <div class="folder-tabs reveal" role="tablist">
+          <button class="folder-tab" data-target="fp-1" aria-selected="true"><span class="num">01</span>Análisis químico</button>
+          <button class="folder-tab" data-target="fp-2" aria-selected="false"><span class="num">02</span>Propiedades</button>
+          <button class="folder-tab" data-target="fp-3" aria-selected="false"><span class="num">03</span>Producción</button>
+          <button class="folder-tab" data-target="fp-4" aria-selected="false"><span class="num">04</span>Impacto</button>
+          <button class="folder-tab" data-target="fp-5" aria-selected="false"><span class="num">05</span>Aplicaciones</button>
+          <button class="folder-tab" data-target="fp-6" aria-selected="false"><span class="num">06</span>Postura</button>
+          <button class="folder-tab" data-target="fp-7" aria-selected="false"><span class="num">07</span>Evidencia</button>
+        </div>
+
+        <div class="folder-body reveal">
+
+          <article class="folder-panel active" id="fp-1">
+            <div class="stamp-corner"><div class="stamp">PRUEBA N°1</div></div>
+            <h3>Análisis químico de la molécula</h3>
+            <p>El SO₂ posee 18 electrones de valencia (6 del azufre + 6 de cada oxígeno). En su <span class="gloss" data-term="par libre">estructura de Lewis</span>, el azufre actúa como átomo central con tres dominios electrónicos: un par libre y dos regiones de enlace, una de las cuales es un doble enlace y la otra un simple. Sin embargo, la realidad experimental muestra dos enlaces equivalentes: la molécula adopta un híbrido de resonancia donde los electrones π están deslocalizados entre ambos átomos de oxígeno.</p>
+            <p>Los enlaces S–O son <strong>covalentes polares</strong>, con una diferencia de <span class="gloss" data-term="electronegatividad">electronegatividad</span> Δχ ≈ 0,86 según la escala de Pauling. La carga parcial negativa se concentra en los oxígenos y la positiva en el azufre. La <span class="gloss" data-term="geometría angular">geometría angular</span> de ~119° se predice por la teoría de repulsión de pares electrónicos de la capa de valencia (TRePEV): tres dominios electrónicos con un par libre que demanda más espacio que un par enlazante.</p>
+            <p>El momento dipolar resultante es <strong>μ ≈ 1,63 D</strong>, valor que confirma la naturaleza polar de la molécula. Esta polaridad determina las <span class="gloss" data-term="fuerzas intermoleculares">fuerzas intermoleculares</span> presentes: dipolo-dipolo y dispersión de London. Notablemente, no existen puentes de hidrógeno, ya que los hidrógenos enlazados a oxígeno están ausentes en SO₂ puro.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-2">
+            <div class="stamp-corner"><div class="stamp">PRUEBA N°2</div></div>
+            <h3>Propiedades físicas y comportamiento químico</h3>
+            <p>El dióxido de azufre es un <strong>gas incoloro de olor irritante y picante</strong> reconocible incluso en concentraciones bajas. Su punto de ebullición de –10 °C resulta sorprendentemente alto para su masa molecular (64 g/mol), efecto explicado por las fuerzas dipolo-dipolo derivadas de su polaridad. A temperatura ambiente puede licuarse fácilmente bajo presión moderada.</p>
+            <p>Es <strong>extraordinariamente soluble en agua</strong>: hasta 94 g/L a 25 °C. La disolución no es solo física; el SO₂ reacciona reversiblemente formando ácido sulfuroso: SO₂ + H₂O ⇌ H₂SO₃. Esta reacción es la base química directa de la <span class="gloss" data-term="lluvia ácida">lluvia ácida</span> y explica la corrosión de monumentos de mármol y caliza.</p>
+            <p>Químicamente actúa como agente reductor moderado. En presencia de catalizadores como V₂O₅, se <span class="gloss" data-term="oxidación">oxida</span> a SO₃ mediante el proceso de contacto: 2SO₂ + O₂ → 2SO₃. No es inflamable. Su vida media en la atmósfera oscila entre horas y días, pero sus productos secundarios — sulfatos y H₂SO₄ — persisten mucho más, multiplicando el daño ambiental aguas abajo.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-3">
+            <div class="stamp-corner"><div class="stamp">PRUEBA N°3</div></div>
+            <h3>Producción y orígenes</h3>
+            <p>Las fuentes de SO₂ se clasifican en naturales y antropogénicas, con un balance global aproximado de 20–30% naturales y 70–80% humanas. Las fuentes naturales incluyen erupciones volcánicas (el Pinatubo emitió ~20 Mt en 1991), incendios forestales y la oxidación atmosférica de DMS (sulfuro de dimetilo) emitido por el plancton oceánico.</p>
+            <p>Las emisiones antropogénicas dominan el panorama. La combustión de carbón y petróleo con contenido de azufre representa la mayor contribución, especialmente en centrales termoeléctricas. Le siguen la fundición de minerales sulfurados (cobre, plomo, zinc), refinerías de petróleo, fabricación de papel kraft y el transporte marítimo, que utilizó durante décadas combustibles "bunker" con alto contenido de azufre.</p>
+            <p>Las emisiones globales alcanzaron un pico histórico de ~150 Mt/año en la década de 1980. Hoy se estiman en ~80 Mt/año gracias a regulaciones progresivas — un descenso notable que demuestra que el problema no es la molécula sino su uso descontrolado. La introducción de IMO 2020 redujo además drásticamente las emisiones marítimas globales.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-4">
+            <div class="stamp-corner"><div class="stamp">PRUEBA N°4</div></div>
+            <h3>Impacto biológico y ambiental</h3>
+            <p>En salud humana, el SO₂ irrita las vías respiratorias y mucosas, provocando tos, broncoconstricción y agravando enfermedades como asma y bronquitis crónica. Estudios epidemiológicos (Lelieveld et al., 2015) atribuyen a la contaminación por SO₂ y derivados millones de muertes prematuras anuales por causas cardiorrespiratorias, particularmente entre poblaciones expuestas en zonas industriales.</p>
+            <p>En vegetales, ingresa por los estomas y produce clorosis (pérdida de clorofila) y necrosis foliar. Los líquenes son bioindicadores extremadamente sensibles. A nivel ecosistémico, la <span class="gloss" data-term="lluvia ácida">lluvia ácida</span> derivada acidifica lagos — provocando muerte masiva de peces — y suelos, donde libera Al³⁺ tóxico que daña raíces y desencadena cadenas de daño que pueden tardar décadas en revertirse.</p>
+            <p>El patrimonio cultural también sufre: el SO₂ corroe mármoles, calizas y bronces, deteriorando esculturas y edificios históricos. En cuanto al clima, los aerosoles de sulfato derivados reflejan radiación solar produciendo un efecto enfriador transitorio (Pinatubo enfrió ~0,5 °C el planeta durante dos años), lo que paradójicamente ha alimentado debates sobre geoingeniería.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-5">
+            <div class="stamp-corner"><div class="stamp">PRUEBA N°5</div></div>
+            <h3>Aplicaciones y beneficios industriales</h3>
+            <p>El uso por antonomasia del SO₂ es la producción del <strong>ácido sulfúrico (H₂SO₄)</strong>, llamado "el rey de los químicos" con una producción mundial superior a 260 Mt/año. El H₂SO₄ es la base de la industria de fertilizantes (superfosfatos), baterías plomo-ácido, refinación de petróleo, fabricación de detergentes y procesos metalúrgicos. Sin SO₂, gran parte de la civilización industrial moderna se detiene.</p>
+            <p>Como <strong>conservante alimentario E220</strong>, el SO₂ y sus derivados (sulfitos) preservan vinos, frutas secas, jugos y mermeladas inhibiendo el crecimiento de bacterias y levaduras no deseadas. En la industria del papel y del azúcar funciona como blanqueador, eliminando ligninas y pigmentos no deseados sin recurrir a cloro.</p>
+            <p>Aplicaciones adicionales incluyen su uso histórico como refrigerante (anterior a los freones), agente reductor en síntesis orgánica y reactivo intermedio en la fabricación de fármacos, colorantes y sulfonatos. Esta versatilidad química explica por qué su prohibición resulta inviable y el problema debe enfocarse hacia control de emisiones.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-6">
+            <div class="stamp-corner"><div class="stamp sulfur">DEFENSA</div></div>
+            <h3>Postura: A favor / En contra</h3>
+            <p><strong>A favor (énfasis principal):</strong> El SO₂ es un pilar irreemplazable de la industria química y alimentaria global. Las tecnologías modernas de control — FGD (desulfurización de gases de combustión), scrubbers húmedos y secos — eliminan más del 95% del SO₂ emitido. Europa redujo sus emisiones más de un 90% desde los años 80 sin abandonar su uso industrial: el problema no es la molécula, sino la falta de regulación. Además, su origen natural es inevitable y aporta un efecto enfriador parcial al sistema climático.</p>
+            <p><strong>En contra:</strong> Aproximadamente 7 millones de muertes anuales se atribuyen globalmente a contaminación atmosférica, con el SO₂ y sus derivados como contribuyentes mayores. La lluvia ácida ha devastado ecosistemas y deteriorado patrimonio cultural irrecuperable. Existen alternativas energéticas renovables que reducen drásticamente la necesidad de combustibles azufrados.</p>
+            <p><strong>Conclusión razonada:</strong> La defensa sostiene que prohibir el SO₂ es como prohibir el fuego por los incendios. La respuesta correcta es regular, controlar emisiones y modernizar tecnologías — no demonizar la molécula. La evidencia internacional respalda esta tesis: donde hay regulación seria, el SO₂ deja de ser un problema sin perder su valor industrial.</p>
+          </article>
+
+          <article class="folder-panel" id="fp-7">
+            <div class="stamp-corner"><div class="stamp">EVIDENCIA</div></div>
+            <h3>Evidencia científica documentada</h3>
+            <p><strong>Casos históricos verificados:</strong> el Smog de Londres (1952, ~12.000 muertes), Donora (1948, episodio fundacional de la regulación ambiental), la devastación de la Selva Negra alemana en los años 80, la acidificación masiva de lagos escandinavos, la erupción del Pinatubo (1991) y la erupción submarina de Hunga Tonga-Hunga Ha'apai (2022) que inyectó aerosoles de azufre y vapor de agua a la estratosfera.</p>
+            <p><strong>Casos argentinos relevantes:</strong> el polo petroquímico de Dock Sud-Avellaneda concentra emisiones documentadas con impacto sanitario en barrios linderos. Las refinerías de La Plata, Bahía Blanca y Plaza Huincul presentan también niveles de SO₂ que requieren monitoreo continuo. Estudios de la UBA y la Universidad de La Plata han caracterizado estos focos.</p>
+            <p><strong>Fuentes consultadas:</strong> bases de datos de la Organización Mundial de la Salud (OMS Air Quality Guidelines 2021), reportes del IPCC AR6, US EPA, NASA Earth Observatory, y artículos científicos como Lelieveld et al. (Nature 525:367, 2015). Bibliografía química clásica: Atkins & Jones — <em>Principios de Química</em>; Chang — <em>Química General</em>; Manahan — <em>Environmental Chemistry</em>.</p>
+          </article>
+
+        </div>
+
+        <div class="folder-actions reveal">
+          <a href="#" class="btn dark" onclick="event.preventDefault(); alert('Versión PDF próximamente disponible.');">📥 Descargar expediente PDF</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 5: VIDEOS / CCTV ============== -->
+    <section class="section videos" id="videos">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 4</div>
+        <h2 class="section-title">Testimonios <em>audiovisuales</em></h2>
+        <p class="section-lead">Material restringido: cámaras encubiertas, expertos, documentales del caso.</p>
+
+        <div class="cctv-tabs reveal">
+          <button class="cctv-tab" data-target="cctv-caps" aria-selected="true">⚡ Cápsulas</button>
+          <button class="cctv-tab" data-target="cctv-exp" aria-selected="false">🎓 Voces expertas</button>
+          <button class="cctv-tab" data-target="cctv-doc" aria-selected="false">🎬 Documentales</button>
+        </div>
+
+        <div class="cctv-panel active" id="cctv-caps">
+          <div class="cctv-grid vertical">
+            <div class="cctv-frame vertical" data-cam="01">
+              <iframe src="https://www.youtube.com/embed/zSF0gMrLGsg" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="cctv-frame vertical" data-cam="02">
+              <iframe src="https://www.youtube.com/embed/8xnDoVFyBxI" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="cctv-frame vertical" data-cam="03">
+              <iframe src="https://www.youtube.com/embed/wIGgRHKJqL4" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="cctv-panel" id="cctv-exp">
+          <div class="cctv-grid horizontal">
+            <div class="cctv-frame horizontal" data-cam="04">
+              <iframe src="https://www.youtube.com/embed/WqzakUkc1HI" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="cctv-frame horizontal" data-cam="05">
+              <iframe src="https://www.youtube.com/embed/xxPq1n0XUzw" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+
+        <div class="cctv-panel" id="cctv-doc">
+          <div class="cctv-grid feature">
+            <div class="cctv-frame" data-cam="06">
+              <iframe src="https://www.youtube.com/embed/ZnLsLXC5K60" allow="encrypted-media" allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 6: MAP ============== -->
+    <section class="section map-section" id="mapa">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 5</div>
+        <h2 class="section-title">Mapa de <em>emisiones</em></h2>
+        <p class="section-lead">Hotspots globales de SO₂. Clic en cada punto para abrir el legajo regional.</p>
+
+        <div class="map-wrap reveal">
+          <svg class="world-map" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-label="Mapa mundial de emisiones de SO2">
+            <!-- Stylized continents (very simplified silhouettes) -->
+            <g>
+              <!-- North America -->
+              <path d="M120,90 L260,80 L295,140 L260,190 L240,250 L180,290 L130,260 L80,220 L70,180 L90,130 Z"/>
+              <!-- South America -->
+              <path d="M260,290 L300,270 L320,310 L310,400 L270,460 L240,440 L240,360 Z"/>
+              <!-- Europe -->
+              <path d="M460,110 L530,95 L555,140 L540,180 L490,200 L450,170 Z"/>
+              <!-- Africa -->
+              <path d="M470,210 L545,200 L570,260 L560,330 L530,390 L490,400 L460,340 L450,260 Z"/>
+              <!-- Asia -->
+              <path d="M555,90 L750,80 L820,130 L840,200 L810,250 L740,260 L660,230 L600,200 L560,160 Z"/>
+              <!-- India -->
+              <path d="M650,210 L700,200 L720,260 L685,290 L660,260 Z"/>
+              <!-- Southeast Asia -->
+              <path d="M780,250 L830,240 L850,290 L820,310 L790,290 Z"/>
+              <!-- Australia -->
+              <path d="M820,360 L900,350 L920,400 L880,420 L830,410 Z"/>
+            </g>
+
+            <!-- Hotspots -->
+            <g class="hotspot" data-region="usa" tabindex="0" role="button" aria-label="Hotspot Estados Unidos">
+              <circle class="pulse" cx="180" cy="170" r="6"/>
+              <circle cx="180" cy="170" r="6"/>
+            </g>
+            <g class="hotspot" data-region="europe" tabindex="0" role="button" aria-label="Hotspot Europa">
+              <circle class="pulse" cx="500" cy="140" r="6"/>
+              <circle cx="500" cy="140" r="6"/>
+            </g>
+            <g class="hotspot" data-region="china" tabindex="0" role="button" aria-label="Hotspot China">
+              <circle class="pulse" cx="760" cy="170" r="7"/>
+              <circle cx="760" cy="170" r="7"/>
+            </g>
+            <g class="hotspot" data-region="india" tabindex="0" role="button" aria-label="Hotspot India">
+              <circle class="pulse" cx="685" cy="245" r="6"/>
+              <circle cx="685" cy="245" r="6"/>
+            </g>
+            <g class="hotspot" data-region="argentina" tabindex="0" role="button" aria-label="Hotspot Argentina · Dock Sud">
+              <circle class="pulse" cx="285" cy="420" r="6"/>
+              <circle cx="285" cy="420" r="6"/>
+            </g>
+          </svg>
+
+          <div class="map-legend">
+            <span><span class="dot"></span>Foco de emisión activo · clic para detalle</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 7: TRIAL ============== -->
+    <section class="section trial" id="juicio">
+      <div class="container">
+        <div class="section-label">PRUEBA N° 6</div>
+        <h2 class="section-title">El <em>juicio</em></h2>
+        <p class="section-lead">Argumentos cruzados. Que el jurado — vos — decida.</p>
+
+        <div class="trial-grid reveal">
+          <div class="trial-side prosecution">
+            <h3>LA FISCALÍA</h3>
+            <article class="argument-card headline">
+              <h4>"Asesina silenciosa de Londres"</h4>
+              <p>El smog de 1952 mató a 12.000 personas en cinco días. Tribunales sanitarios la culpan formalmente.</p>
+            </article>
+            <article class="argument-card headline">
+              <h4>"Devastó la Selva Negra"</h4>
+              <p>La lluvia ácida arrasó hectáreas de bosque alemán. Daño ecosistémico documentado por décadas.</p>
+            </article>
+            <article class="argument-card headline">
+              <h4>"7 millones de muertes anuales"</h4>
+              <p>La OMS reporta cifras alarmantes de mortalidad por contaminación; el SO₂ es protagonista en zonas industriales.</p>
+            </article>
+            <article class="argument-card headline">
+              <h4>"Erosiona el patrimonio"</h4>
+              <p>Mármoles, bronces, esculturas: el SO₂ corroe la memoria material de la humanidad.</p>
+            </article>
+          </div>
+
+          <div class="gavel">
+            <svg viewBox="0 0 64 64" fill="none" stroke="#F5C518" stroke-width="3">
+              <rect x="20" y="10" width="24" height="14" rx="2" fill="#F5C518"/>
+              <rect x="29" y="22" width="6" height="28"/>
+              <line x1="14" y1="56" x2="50" y2="56" stroke-width="4"/>
+            </svg>
+            <div class="vote-widget">
+              <h4>¿Culpable o inocente?</h4>
+              <div class="vote-buttons">
+                <button class="innocent" id="vote-innocent"><span>⚖ INOCENTE</span></button>
+                <button class="guilty" id="vote-guilty"><span>🔨 CULPABLE</span></button>
+              </div>
+              <div class="vote-results" id="vote-stats"></div>
+              <div class="vote-bar">
+                <div class="innocent-fill" id="vote-fill-innocent"></div>
+                <div class="guilty-fill" id="vote-fill-guilty"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="trial-side defense">
+            <h3>LA DEFENSA</h3>
+            <article class="argument-card dossier">
+              <h4>EL PROBLEMA NO ES LA MOLÉCULA</h4>
+              <p>Europa redujo emisiones >90% desde los 80 sin abandonar su uso industrial. Donde hay regulación, el SO₂ deja de ser un problema. La causa raíz es regulatoria, no química.</p>
+            </article>
+            <article class="argument-card dossier">
+              <h4>PILAR DE LA INDUSTRIA</h4>
+              <p>Sin SO₂ no hay H₂SO₄ — el "rey de los químicos", base de fertilizantes, baterías y refinación. 260 Mt/año sostienen la civilización moderna. Prohibirlo sería suicida.</p>
+            </article>
+            <article class="argument-card dossier">
+              <h4>TECNOLOGÍA DISPONIBLE</h4>
+              <p>FGD y scrubbers eliminan >95% del SO₂. La solución técnica existe y es probada. Solo falta voluntad política y aplicación rigurosa.</p>
+            </article>
+            <article class="argument-card dossier">
+              <h4>PROTECTOR CLIMÁTICO PARCIAL</h4>
+              <p>Los aerosoles de sulfato reflejan radiación solar. Pinatubo enfrió el planeta 0,5 °C en 1991. Estudios serios de geoingeniería consideran este efecto.</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 8: CLOSING ============== -->
+    <section class="section closing" id="alegato">
+      <canvas class="closing-canvas" id="closing-canvas"></canvas>
+      <div class="closing-content">
+        <div class="closing-label">ALEGATO FINAL</div>
+        <p class="closing-text">
+          Hemos visto pruebas, escuchado testimonios, contemplado mapas. La evidencia es contundente: la sospechosa
+          tiene una historia oscura, sí — pero también una contribución ineludible al mundo moderno.
+          La química no se juzga por moral; se entiende por reacciones, por contexto, por uso.
+        </p>
+        <p class="closing-quote">"El SO₂ no es el enemigo. Lo es el uso irresponsable. Regular, no prohibir."</p>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 9: GAMES ============== -->
+    <section class="section games-section" id="juegos">
+      <div class="container">
+        <div class="section-label">SALA DE DESCANSO</div>
+        <h2 class="section-title">Juegos del <em>caso</em></h2>
+        <p class="section-lead">Cinco actividades para asimilar lo investigado. Tus tiempos y récords se guardan localmente.</p>
+
+        <div class="games-grid reveal">
+          <article class="game-card featured" data-game="lewis" tabindex="0">
+            <div class="game-num">JUEGO 01 · DESTACADO</div>
+            <h3>Lewis Builder</h3>
+            <p>Una estructura está mal. Tu misión: identificar el error y reconstruir la verdadera forma del SO₂. De 3D roto → puzzle → 3D correcto.</p>
+            <span class="play">JUGAR ▸</span>
+          </article>
+
+          <article class="game-card" data-game="snake" tabindex="0">
+            <div class="game-num">JUEGO 02</div>
+            <h3>Sulfusnake</h3>
+            <p>Soy azufre, busco oxígeno. Capturá de a dos para formar SO₂. Cuidado con el agua y la sobreoxidación.</p>
+            <span class="play">JUGAR ▸</span>
+          </article>
+
+          <article class="game-card" data-game="acid" tabindex="0">
+            <div class="game-num">JUEGO 03</div>
+            <h3>Ácido Defense</h3>
+            <p>Atrapá la lluvia ácida con tu paraguas. Salvá los 10 árboles. Que no caiga ninguna gota roja.</p>
+            <span class="play">JUGAR ▸</span>
+          </article>
+
+          <article class="game-card" data-game="memo" tabindex="0">
+            <div class="game-num">JUEGO 04</div>
+            <h3>Memotest Químico</h3>
+            <p>Encontrá los pares: conceptos, símbolos, fórmulas. ¿Cuántos movimientos te lleva?</p>
+            <span class="play">JUGAR ▸</span>
+          </article>
+
+          <article class="game-card" data-game="quiz" tabindex="0">
+            <div class="game-num">JUEGO 05</div>
+            <h3>¿Cuánto sabés del SO₂?</h3>
+            <p>10 preguntas, 15 segundos cada una. Llegá al rango de Jefe del Expediente 64.</p>
+            <span class="play">JUGAR ▸</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============== SECTION 10: CREDITS ============== -->
+    <section class="section credits" id="creditos">
+      <div class="container">
+        <div class="section-label">CRÉDITOS DEL CASO</div>
+        <h2 class="section-title">Equipo de <em>investigación</em></h2>
+        <p class="section-lead">Fichas de los responsables. Bibliografía consultada en formato catálogo.</p>
+
+        <div class="credits-grid">
+          <div class="library-card">
+            <div class="label">N°001 · DETECTIVE</div>
+            <div class="name">Equipo SO₂</div>
+            <div class="alias">"Los Defensores"</div>
+            <div class="skill">Especialidad: Química inorgánica · Argumentación científica</div>
+          </div>
+          <div class="library-card">
+            <div class="label">N°002 · PERITO</div>
+            <div class="name">5° año Química</div>
+            <div class="alias">"La Promoción"</div>
+            <div class="skill">Especialidad: Análisis estructural · Reacciones</div>
+          </div>
+          <div class="library-card">
+            <div class="label">N°003 · ARCHIVO</div>
+            <div class="name">Cátedra de Química</div>
+            <div class="alias">"El Mentor"</div>
+            <div class="skill">Especialidad: Currículum · Pedagogía</div>
+          </div>
+          <div class="library-card">
+            <div class="label">N°004 · VISUAL</div>
+            <div class="name">Diseño 3D</div>
+            <div class="alias">"El Artista"</div>
+            <div class="skill">Especialidad: Three.js · Modelado molecular</div>
+          </div>
+        </div>
+
+        <div class="biblio">
+          <h3>📚 BIBLIOGRAFÍA CONSULTADA</h3>
+          <ul class="biblio-list">
+            <li>Atkins, P. & Jones, L. — <em>Principios de Química: los caminos del descubrimiento</em>. 5ª ed.</li>
+            <li>Chang, R. — <em>Química General</em>. McGraw-Hill, 11ª ed.</li>
+            <li>Manahan, S. — <em>Environmental Chemistry</em>. CRC Press, 10ª ed.</li>
+            <li>IPCC AR6 — <em>Climate Change 2021: The Physical Science Basis</em></li>
+            <li>OMS — <em>Air Quality Guidelines 2021</em></li>
+            <li>US EPA — <em>Sulfur Dioxide Basics</em>. epa.gov</li>
+            <li>Lelieveld, J. et al. (2015) — <em>Nature</em> 525:367–371</li>
+            <li>NASA Earth Observatory — Sulfur dioxide imagery & data</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal-backdrop">
+    <div class="modal-window" id="modal-window"></div>
+  </div>
+
+  <!-- Declassified overlay (Konami) -->
+  <div class="declass-overlay" id="declass-overlay">
+    <h2 class="glitch" data-text="MODO DESCLASIFICADO">MODO DESCLASIFICADO</h2>
+    <p>Acceso autorizado al ala restringida del archivo. La investigación nunca termina. La ciencia es la única defensa contra el dogma. <strong>Bienvenido, agente.</strong></p>
+    <button>Volver al expediente</button>
+  </div>
+
+  <!-- Hidden envelope (10x stamp) -->
+  <div class="secret-envelope" id="secret-envelope">
+    <button class="close-secret" aria-label="Cerrar">✕</button>
+    <h4>📨 Mensaje encubierto</h4>
+    <p>"La química no juzga: comprende. Cada átomo cuenta una historia. El SO₂ es ambivalente como la humanidad misma — capaz de destruir y de construir. Tu rol como investigador es ver más allá del prejuicio."</p>
+  </div>
+
+  <script type="module" src="scripts/main.js"></script>
+</body>
+</html>

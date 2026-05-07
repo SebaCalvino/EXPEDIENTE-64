@@ -1,0 +1,433 @@
+/* === Game shell === */
+.game-shell {
+  padding: 40px;
+  position: relative;
+}
+.game-shell h2 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  letter-spacing: 0.1em;
+  color: var(--confidential);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.game-shell .game-tag {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--smoke);
+  margin-bottom: 24px;
+}
+.game-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.game-hud {
+  display: flex;
+  gap: 24px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.game-hud span {
+  background: var(--charcoal);
+  color: var(--sulfur);
+  padding: 6px 14px;
+  border-radius: 4px;
+}
+.game-canvas {
+  border: 2px solid var(--charcoal);
+  background: var(--charcoal);
+  display: block;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.game-controls {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.game-controls button {
+  font-family: var(--font-display);
+  padding: 10px 16px;
+  background: var(--manila);
+  border: 2px solid var(--charcoal);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.touch-pad {
+  display: none;
+  margin-top: 18px;
+  grid-template-columns: 60px 60px 60px;
+  grid-template-rows: 60px 60px 60px;
+  gap: 6px;
+}
+.touch-pad button {
+  font-size: 1.4rem;
+  background: var(--charcoal);
+  color: var(--sulfur);
+  border: 2px solid var(--sulfur);
+  border-radius: 8px;
+  font-weight: bold;
+}
+.touch-pad .up { grid-column: 2; grid-row: 1; }
+.touch-pad .left { grid-column: 1; grid-row: 2; }
+.touch-pad .right { grid-column: 3; grid-row: 2; }
+.touch-pad .down { grid-column: 2; grid-row: 3; }
+@media (pointer: coarse) {
+  .touch-pad { display: grid; }
+}
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 20, 25, 0.92);
+  flex-direction: column;
+  z-index: 5;
+  text-align: center;
+  padding: 30px;
+}
+.game-overlay.show { display: flex; }
+.game-overlay h3 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--sulfur);
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+.game-overlay p {
+  color: var(--smoke-light);
+  font-family: var(--font-serif);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+
+/* === Memotest === */
+.memo-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+.memo-card {
+  aspect-ratio: 1;
+  perspective: 800px;
+  cursor: pointer;
+}
+.memo-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+.memo-card.flipped .memo-inner,
+.memo-card.matched .memo-inner { transform: rotateY(180deg); }
+.memo-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border: 2px solid var(--charcoal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  text-align: center;
+  padding: 6px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+.memo-face.front {
+  background: var(--charcoal);
+  color: var(--sulfur);
+  font-size: 1.5rem;
+}
+.memo-face.back {
+  background: var(--manila);
+  color: var(--charcoal);
+  transform: rotateY(180deg);
+  word-break: break-word;
+}
+.memo-card.matched .memo-face.back {
+  background: var(--acid-green);
+  color: var(--charcoal);
+}
+
+/* === Quiz === */
+.quiz-shell {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px;
+}
+.quiz-progress {
+  height: 6px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.quiz-progress-fill {
+  height: 100%;
+  background: var(--sulfur);
+  transition: width 0.4s;
+}
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--smoke);
+  margin-bottom: 24px;
+}
+.quiz-question {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  margin-bottom: 24px;
+  line-height: 1.4;
+}
+.quiz-options {
+  display: grid;
+  gap: 10px;
+}
+.quiz-option {
+  font-family: var(--font-body);
+  padding: 14px 20px;
+  background: var(--manila);
+  border: 2px solid var(--charcoal);
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+}
+.quiz-option:hover { background: var(--manila-dark); transform: translateX(4px); }
+.quiz-option.correct { background: var(--acid-green); color: var(--charcoal); }
+.quiz-option.wrong { background: var(--confidential); color: var(--bone); }
+.quiz-option:disabled { cursor: not-allowed; }
+.quiz-feedback {
+  margin-top: 16px;
+  font-style: italic;
+  color: var(--smoke);
+  font-family: var(--font-serif);
+  min-height: 1.5em;
+}
+.quiz-result {
+  text-align: center;
+  padding: 30px 0;
+}
+.quiz-result .rank {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  color: var(--confidential);
+  margin: 20px 0;
+  text-shadow: 0 0 30px var(--sulfur-glow);
+  animation: rankFlash 1s ease-out;
+}
+@keyframes rankFlash {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); color: var(--sulfur); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.quiz-result .score {
+  font-family: var(--font-mono);
+  font-size: 1.4rem;
+  margin-bottom: 30px;
+}
+
+/* === Lewis Builder === */
+.lewis-shell {
+  position: relative;
+  min-height: 600px;
+  background: linear-gradient(180deg, #1a2129 0%, #0f1419 100%);
+  color: var(--bone);
+  padding: 30px;
+}
+.lewis-phase { display: none; }
+.lewis-phase.active { display: block; animation: fadeIn 0.5s; }
+.lewis-3d {
+  width: 100%;
+  height: 480px;
+  position: relative;
+  cursor: pointer;
+}
+.lewis-3d canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+.lewis-3d-label {
+  position: absolute;
+  top: 20px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  background: var(--confidential);
+  color: var(--bone);
+  padding: 8px 18px;
+  letter-spacing: 0.15em;
+  animation: pulseSoft 2s ease-in-out infinite;
+  z-index: 2;
+  font-size: 0.9rem;
+}
+.lewis-3d-caption {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--smoke-light);
+  margin-top: 16px;
+  font-size: 1.05rem;
+}
+
+.puzzle-board {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto;
+  height: 360px;
+  background: rgba(0,0,0,0.3);
+  border: 2px dashed rgba(245, 197, 24, 0.3);
+  border-radius: 12px;
+}
+.puzzle-slot {
+  position: absolute;
+  border: 2px dashed var(--smoke);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  color: var(--smoke);
+  background: rgba(255,255,255,0.03);
+  transition: all 0.25s;
+}
+.puzzle-slot.atom-slot { width: 80px; height: 80px; border-radius: 50%; }
+.puzzle-slot.bond-slot { width: 90px; height: 36px; }
+.puzzle-slot.lp-slot { width: 70px; height: 36px; }
+
+.puzzle-slot.filled {
+  border-style: solid;
+  border-color: var(--sulfur);
+  color: var(--bone);
+}
+.puzzle-slot.correct {
+  border-color: var(--acid-green);
+  background: rgba(132, 204, 22, 0.15);
+}
+.puzzle-slot.wrong {
+  border-color: var(--confidential);
+  animation: shake 0.4s;
+}
+@keyframes shake {
+  0%, 100% { transform: translate(0); }
+  20% { transform: translate(-6px, 0); }
+  40% { transform: translate(6px, 0); }
+  60% { transform: translate(-4px, 0); }
+  80% { transform: translate(4px, 0); }
+}
+
+/* slot positions: S center, O left/right, lone pair on top, bonds in between */
+.slot-S { left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--sulfur); border-color: var(--sulfur); color: var(--charcoal); }
+.slot-O-left { left: 12%; top: 50%; transform: translateY(-50%); }
+.slot-O-right { right: 12%; top: 50%; transform: translateY(-50%); }
+.slot-bond-left { left: 25%; top: 50%; transform: translateY(-50%); }
+.slot-bond-right { right: 25%; top: 50%; transform: translateY(-50%); }
+.slot-LP { left: 50%; top: 16%; transform: translateX(-50%); }
+
+.puzzle-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 30px;
+  padding: 18px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  min-height: 80px;
+}
+.token {
+  font-family: var(--font-display);
+  background: var(--manila);
+  color: var(--charcoal);
+  padding: 12px 18px;
+  border: 2px solid var(--charcoal);
+  cursor: grab;
+  user-select: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: transform 0.15s, box-shadow 0.15s;
+  touch-action: none;
+}
+.token:hover { transform: scale(1.08); box-shadow: 0 4px 12px rgba(245,197,24,0.4); }
+.token.dragging {
+  position: fixed !important;
+  z-index: 9999;
+  cursor: grabbing;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.token.O { background: var(--confidential); color: var(--bone); border-color: var(--bone); }
+.token.bond { font-size: 1.4rem; padding: 8px 18px; }
+.token.lp { background: var(--bone); }
+.token.distractor { opacity: 0.85; }
+.token.placed { opacity: 0.3; cursor: not-allowed; }
+
+.puzzle-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.puzzle-hint {
+  margin-top: 16px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--sulfur);
+  min-height: 1.5em;
+  font-size: 0.95rem;
+}
+
+.lewis-win-banner {
+  font-family: var(--font-display);
+  text-align: center;
+  font-size: 2.2rem;
+  color: var(--acid-green);
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+  text-shadow: 0 0 30px rgba(132,204,22,0.5);
+  animation: rankFlash 1s ease-out;
+}
+.win-stats {
+  text-align: center;
+  font-family: var(--font-mono);
+  color: var(--smoke-light);
+  margin-bottom: 20px;
+}
+
+/* === Acid Defense === */
+.acid-meta {
+  display: flex;
+  justify-content: space-around;
+  font-family: var(--font-mono);
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 600px;
+}
+.acid-meta span { color: var(--sulfur); }
+
+/* === Snake === */
+.snake-meta {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+}
