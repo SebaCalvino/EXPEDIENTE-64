@@ -470,3 +470,53 @@
   font-family: var(--font-mono);
   font-size: 0.95rem;
 }
+
+/* === Lewis difficulty bar === */
+.lewis-diff-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.lewis-diff-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  color: var(--smoke-light);
+  text-transform: uppercase;
+}
+.lewis-diff-btn {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  background: transparent;
+  border: 2px solid rgba(245,197,24,0.3);
+  color: var(--smoke-light);
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+.lewis-diff-btn:hover {
+  border-color: var(--sulfur);
+  color: var(--sulfur);
+}
+.lewis-diff-btn.active {
+  background: var(--sulfur);
+  border-color: var(--sulfur);
+  color: var(--charcoal);
+  font-weight: bold;
+}
+
+/* === Lewis timer === */
+.lewis-timer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 1.2rem;
+  color: var(--sulfur);
+  letter-spacing: 0.2em;
+  margin-bottom: 10px;
+  animation: blink 1s step-end infinite;
+}
