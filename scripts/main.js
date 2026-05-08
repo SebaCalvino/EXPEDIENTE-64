@@ -20,7 +20,6 @@ window.addEventListener('DOMContentLoaded', function() {
   initFolder();
   initVideos();
   initMap();
-  initVoting();
   initClosing();
   initGames();
   initEasterEggs();

@@ -2,9 +2,9 @@ window.E64 = window.E64 || {};
 
 window.E64.buildLewisGame = function(container) {
   var HINTS = [
-    'El azufre tiene 1 par libre que apunta hacia arriba (··).',
-    'Uno de los enlaces es doble (=) y el otro es simple (–).',
-    'Los dos átomos laterales son oxígeno (O).'
+    'Recordá la regla del octeto: el átomo central debe completar 8 e⁻ contando enlaces y pares no enlazantes.',
+    'El SO₂ tiene 18 electrones de valencia. Distribuilos pensando: ¿cuántos forman enlaces y cuántos quedan como pares?',
+    'La geometría angular (~119°) sugiere 3 dominios electrónicos sobre el átomo central. ¿Cuáles?'
   ];
   container.innerHTML = [
     '<div class="game-shell lewis-shell">',
@@ -86,6 +86,28 @@ window.E64.buildLewisGame = function(container) {
     var slots  = container.querySelectorAll('.puzzle-slot[data-accept]');
     var tokens = container.querySelectorAll('.token');
     tokens.forEach(function(t) { attachDrag(t, slots); });
+    slots.forEach(function(slot) {
+      slot.addEventListener('click', function() {
+        if (!slot.classList.contains('filled')) return;
+        // return token to pool
+        var slotId = slot.dataset.slot;
+        var typeUsed = slotState[slotId];
+        delete slotState[slotId];
+        slot.classList.remove('filled', 'correct', 'wrong', 'shaking');
+        var a = slot.dataset.accept;
+        slot.textContent = a==='O' ? 'O?' : a==='lp' ? ':?' : '?';
+        // return first matching hidden token
+        var pool = container.querySelector('#puzzle-pool');
+        var allTokens = pool.querySelectorAll('.token.placed');
+        for (var i = 0; i < allTokens.length; i++) {
+          if (allTokens[i].dataset.type === typeUsed) {
+            allTokens[i].classList.remove('placed');
+            allTokens[i].style.visibility = '';
+            break;
+          }
+        }
+      });
+    });
     container.querySelector('#hint-btn').onclick     = useHint;
     container.querySelector('#validate-btn').onclick = validate;
     container.querySelector('#reset-btn').onclick    = resetPuzzle;
@@ -162,22 +184,84 @@ window.E64.buildLewisGame = function(container) {
 
   function validate() {
     var hintEl = container.querySelector('#puzzle-hint');
-    var ok = slotState['O-left']==='O' &&
-             slotState['O-right']==='O' &&
-             slotState['LP']==='lp' &&
-             ((slotState['bond-left']==='=' && slotState['bond-right']==='–') ||
-              (slotState['bond-left']==='–' && slotState['bond-right']==='='));
-    if (ok) {
+    var board  = container.querySelector('#puzzle-board');
+
+    // Check each requirement and identify wrong slots
+    var problems = [];
+    var wrongSlots = [];
+    var slots = container.querySelectorAll('.puzzle-slot[data-accept]');
+
+    var allFilled = ['O-left','O-right','LP','bond-left','bond-right'].every(function(k) {
+      return slotState[k] !== undefined;
+    });
+
+    if (!allFilled) {
+      hintEl.textContent = '⚠ Faltan piezas. Completá todos los espacios antes de validar.';
+      hintEl.style.color = 'var(--confidential)';
+      board.classList.add('wrong');
+      playBuzz();
+      slots.forEach(function(s) { if (!s.classList.contains('filled')) s.classList.add('shaking'); });
+      setTimeout(function() {
+        board.classList.remove('wrong');
+        slots.forEach(function(s) { s.classList.remove('shaking'); });
+      }, 600);
+      return;
+    }
+
+    if (slotState['O-left'] !== 'O') { problems.push('lateral izquierdo'); wrongSlots.push('O-left'); }
+    if (slotState['O-right'] !== 'O') { problems.push('lateral derecho'); wrongSlots.push('O-right'); }
+    if (slotState['LP'] !== 'lp') { problems.push('par libre'); wrongSlots.push('LP'); }
+
+    var bondsOK = (slotState['bond-left']==='=' && slotState['bond-right']==='–') ||
+                  (slotState['bond-left']==='–' && slotState['bond-right']==='=');
+    if (!bondsOK) {
+      problems.push('combinación de enlaces');
+      wrongSlots.push('bond-left'); wrongSlots.push('bond-right');
+    }
+
+    if (problems.length === 0) {
       hintEl.textContent = '¡Estructura correcta! Construyendo modelo 3D…';
       hintEl.style.color = 'var(--acid-green)';
       setTimeout(goWin, 700);
-    } else {
-      hintEl.textContent = 'Pista: el azufre tiene un par libre y forma una resonancia entre enlace simple y doble.';
-      hintEl.style.color = 'var(--confidential)';
-      container.querySelector('#puzzle-board').classList.add('wrong');
-      playBuzz();
-      setTimeout(function() { container.querySelector('#puzzle-board').classList.remove('wrong'); }, 500);
+      return;
     }
+
+    // WRONG state
+    hintEl.textContent = '✗ Estructura inválida. Revisá: ' + problems.join(', ') + '. Tocá una pieza para retirarla.';
+    hintEl.style.color = 'var(--confidential)';
+    board.classList.add('wrong');
+    playBuzz();
+    wrongSlots.forEach(function(slotId) {
+      var s = container.querySelector('.puzzle-slot[data-slot="' + slotId + '"]');
+      if (s) s.classList.add('shaking');
+    });
+    setTimeout(function() {
+      board.classList.remove('wrong');
+      wrongSlots.forEach(function(slotId) {
+        var s = container.querySelector('.puzzle-slot[data-slot="' + slotId + '"]');
+        if (s) {
+          s.classList.remove('shaking');
+          // auto-clear wrong slots so user can retry
+          if (slotState[slotId] !== undefined) {
+            var typeUsed = slotState[slotId];
+            delete slotState[slotId];
+            s.classList.remove('filled', 'correct');
+            var a = s.dataset.accept;
+            s.textContent = a==='O' ? 'O?' : a==='lp' ? ':?' : '?';
+            // return token
+            var pool = container.querySelector('#puzzle-pool');
+            var allTokens = pool.querySelectorAll('.token.placed');
+            for (var i = 0; i < allTokens.length; i++) {
+              if (allTokens[i].dataset.type === typeUsed) {
+                allTokens[i].classList.remove('placed');
+                allTokens[i].style.visibility = '';
+                break;
+              }
+            }
+          }
+        }
+      });
+    }, 700);
   }
 
   function useHint() {

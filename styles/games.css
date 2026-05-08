@@ -331,6 +331,45 @@
   60% { transform: translate(-4px, 0); }
   80% { transform: translate(4px, 0); }
 }
+.puzzle-board.wrong {
+  animation: boardShake 0.55s;
+  background: rgba(201, 48, 44, 0.12);
+}
+@keyframes boardShake {
+  0%, 100% { transform: translate(0); }
+  10%, 50%, 90% { transform: translate(-10px, 0); }
+  30%, 70% { transform: translate(10px, 0); }
+}
+.puzzle-slot.shaking {
+  animation: shake 0.5s;
+  background: rgba(201, 48, 44, 0.25) !important;
+  border-color: var(--confidential) !important;
+}
+.puzzle-slot.filled {
+  cursor: pointer;
+}
+.puzzle-slot.filled:hover {
+  border-color: var(--confidential);
+  background: rgba(201,48,44,0.2);
+}
+.puzzle-slot.filled.atom-slot:hover::after,
+.puzzle-slot.filled.bond-slot:hover::after,
+.puzzle-slot.filled.lp-slot:hover::after {
+  content: '✕';
+  position: absolute;
+  font-size: 0.6em;
+  top: -2px;
+  right: -2px;
+  background: var(--confidential);
+  color: var(--bone);
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+}
 
 /* slot positions: S center, O left/right, lone pair on top, bonds in between */
 .slot-S { left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--sulfur); border-color: var(--sulfur); color: var(--charcoal); }

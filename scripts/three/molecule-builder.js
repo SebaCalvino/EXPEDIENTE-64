@@ -32,12 +32,12 @@ window.E64.MoleculeBuilder = (function() {
     const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
 
     function buildCyl(offset) {
-      const geom = new THREE.CylinderGeometry(0.07, 0.07, len, 16);
+      const geom = new THREE.CylinderGeometry(0.11, 0.11, len, 20);
       const mat  = new THREE.MeshStandardMaterial({
-        color: opts.color !== undefined ? opts.color : 0x9CA3AF,
-        metalness: 0.4, roughness: 0.4,
-        emissive: opts.emissive || 0x000000,
-        emissiveIntensity: opts.emissiveIntensity || 0
+        color: opts.color !== undefined ? opts.color : 0xCCCCCC,
+        metalness: 0.5, roughness: 0.3,
+        emissive: opts.emissive || 0x222222,
+        emissiveIntensity: opts.emissiveIntensity !== undefined ? opts.emissiveIntensity : 0.15
       });
       const cyl = new THREE.Mesh(geom, mat);
       cyl.castShadow = true;
@@ -54,8 +54,8 @@ window.E64.MoleculeBuilder = (function() {
     if (type === 'single') {
       group.add(buildCyl());
     } else if (type === 'double') {
-      let perp = new THREE.Vector3(-dir.y, dir.x, 0).normalize().multiplyScalar(0.13);
-      if (perp.lengthSq() < 0.001) perp.set(0.13, 0, 0);
+      let perp = new THREE.Vector3(-dir.y, dir.x, 0).normalize().multiplyScalar(0.18);
+      if (perp.lengthSq() < 0.001) perp.set(0.18, 0, 0);
       group.add(buildCyl(perp));
       group.add(buildCyl(perp.clone().negate()));
     }
