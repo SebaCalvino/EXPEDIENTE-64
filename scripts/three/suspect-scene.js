@@ -3,22 +3,37 @@ window.E64 = window.E64 || {};
 window.E64.initSuspectScene = function(canvas) {
   var MB = window.E64.MoleculeBuilder;
   var s  = MB.createScene(canvas, true);
-  s.camera.position.set(0, 0.6, 5);
+  s.camera.position.set(0, 0, 5.5);
+  s.camera.lookAt(0, 0, 0);
 
-  var molecule = MB.createSO2({ scale: 1.1, withLonePair: true });
+  var molecule = MB.createSO2({ scale: 1.15, withLonePair: true });
   s.scene.add(molecule);
 
   var controls = null;
-  if (THREE.OrbitControls) {
-    controls = new THREE.OrbitControls(s.camera, canvas);
+  if (typeof THREE !== 'undefined' && THREE.OrbitControls) {
+    controls = new THREE.OrbitControls(s.camera, s.renderer.domElement);
     controls.enableDamping   = true;
     controls.dampingFactor   = 0.08;
     controls.autoRotate      = true;
-    controls.autoRotateSpeed = 1.0;
+    controls.autoRotateSpeed = 0.8;
     controls.enablePan       = false;
     controls.minDistance     = 3;
-    controls.maxDistance     = 10;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) controls.autoRotate = false;
+    controls.maxDistance     = 12;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      controls.autoRotate = false;
+    }
+
+    /* Pause autoRotate on interaction, resume after 3s */
+    var resumeTimer = null;
+    controls.addEventListener('start', function() {
+      controls.autoRotate = false;
+      if (resumeTimer) clearTimeout(resumeTimer);
+    });
+    controls.addEventListener('end', function() {
+      resumeTimer = setTimeout(function() {
+        controls.autoRotate = true;
+      }, 3000);
+    });
   }
 
   var isVisible = false;
@@ -29,8 +44,11 @@ window.E64.initSuspectScene = function(canvas) {
 
   function animate() {
     if (!isVisible) { rafId = null; return; }
-    if (!controls) molecule.rotation.y += 0.008;
-    if (controls) controls.update();
+    if (controls) {
+      controls.update();
+    } else {
+      molecule.rotation.y += 0.008;
+    }
     s.renderer.render(s.scene, s.camera);
     rafId = requestAnimationFrame(animate);
   }
@@ -41,7 +59,7 @@ window.E64.initSuspectScene = function(canvas) {
         isVisible = e.isIntersecting;
         if (isVisible && !rafId) animate();
       });
-    }, { threshold: 0.1 }).observe(canvas);
+    }, { threshold: 0.05 }).observe(canvas);
   } else {
     isVisible = true; animate();
   }
@@ -51,6 +69,7 @@ window.E64.initAmbientBackgroundScene = function(canvas) {
   var MB = window.E64.MoleculeBuilder;
   var s  = MB.createScene(canvas, true);
   s.camera.position.set(0, 0, 7);
+  s.camera.lookAt(0, 0, 0);
 
   var molecule = MB.createSO2({ scale: 2.2, withLonePair: true });
   molecule.traverse(function(o) {

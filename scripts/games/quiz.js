@@ -23,6 +23,17 @@ window.E64.buildQuiz = function(container) {
     setTimeout(function(){current++;if(current>=QS.length)showResult();else renderQuestion();},1800);
   }
   function showResult() {
+    /* Easter egg: 0/10 → Rami message */
+    if (correct === 0 && window.E64.unlockEgg) {
+      window.E64.unlockEgg('rami_egg_quiz');
+      body.innerHTML = '<div class="quiz-result" style="background:#000;color:#C9302C;padding:40px;font-family:\'Special Elite\',serif;">' +
+        '<p style="font-size:1.5rem;letter-spacing:0.2em;margin-bottom:20px">0 / 10</p>' +
+        '<p style="font-size:1rem;line-height:1.8;color:#ff4444;margin-bottom:24px">Respondiste todo mal a propósito.<br>Él te lo agradece.</p>' +
+        '<img src="assets/img/ramapita1.png" style="width:160px;height:160px;object-fit:cover;border-radius:50%;filter:contrast(1.4) saturate(0.3);border:2px solid #C9302C;margin-bottom:20px;">' +
+        '<div class="puzzle-actions"><button class="btn" id="quiz-retry">↺ Reintentar</button></div></div>';
+      body.querySelector('#quiz-retry').onclick = function() { current=0; correct=0; renderQuestion(); };
+      return;
+    }
     var rank=correct<=3?'Pasante':correct<=6?'Detective junior':correct<=9?'Investigador senior':'Jefe del Expediente 64';
     body.innerHTML='<div class="quiz-result"><p class="quiz-meta" style="justify-content:center">RANGO ASIGNADO</p><div class="rank">'+rank+'</div><p class="score">'+correct+' / '+QS.length+' correctas</p><div class="puzzle-actions"><button class="btn" id="quiz-retry">↺ Reintentar</button><button class="btn dark" id="quiz-share">Compartir</button></div></div>';
     if(window.E64.fireConfetti) window.E64.fireConfetti();

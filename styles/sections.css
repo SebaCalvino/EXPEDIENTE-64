@@ -191,6 +191,8 @@
   width: 100% !important;
   height: 100% !important;
   cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
 }
 .suspect-3d canvas:active { cursor: grabbing; }
 
@@ -539,114 +541,76 @@
 .cctv-grid.horizontal {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
-.cctv-grid.feature { grid-template-columns: 1fr; }
-.cctv-grid.feature .cctv-frame { aspect-ratio: 16/9; max-width: 900px; margin: 0 auto; }
+.cctv-grid.feature { grid-template-columns: 1fr; max-width: 900px; margin: 0 auto; }
 .cctv-frame {
   position: relative;
   background: #000;
-  border: 2px solid rgba(245, 197, 24, 0.4);
-  box-shadow: 0 0 30px rgba(245, 197, 24, 0.1), inset 0 0 0 1px rgba(0,0,0,0.5);
+  border: 2px solid rgba(245, 197, 24, 0.45);
+  box-shadow: 0 0 30px rgba(245, 197, 24, 0.12), inset 0 0 0 1px rgba(0,0,0,0.5);
   overflow: hidden;
 }
-.cctv-frame.vertical { aspect-ratio: 9/16; }
-.cctv-frame.horizontal { aspect-ratio: 16/9; }
-.cctv-frame iframe {
+/* Aspect ratio wrapper around iframe */
+.cctv-ratio {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.cctv-ratio.vertical  { aspect-ratio: 9 / 16; }
+.cctv-ratio.horizontal { aspect-ratio: 16 / 9; }
+.cctv-ratio iframe {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   border: 0;
 }
-.cctv-link {
+/* CCTV decorative overlay — pointer-events: none so iframe stays interactive */
+.cctv-overlay {
   position: absolute;
   inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  color: var(--bone);
-  text-align: center;
-  padding: 30px 18px;
-  background: linear-gradient(135deg, #0F1419 0%, #1f2a35 50%, #0F1419 100%);
-  transition: all 0.3s;
-  overflow: hidden;
-}
-.cctv-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 3px);
+  z-index: 3;
   pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
 }
-.cctv-link:hover {
-  background: linear-gradient(135deg, #1a2129 0%, #2a3850 50%, #1a2129 100%);
-}
-.cctv-link:hover .cctv-play { transform: scale(1.18); background: var(--sulfur); }
-.cctv-icon {
-  font-size: 2.6rem;
-  margin-bottom: 14px;
-  filter: drop-shadow(0 0 12px rgba(245,197,24,0.4));
-}
-.cctv-title {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-  color: var(--bone);
-  line-height: 1.3;
-}
-.cctv-meta {
+.cctv-badge {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
-  color: var(--smoke-light);
-  margin-bottom: 18px;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--confidential);
+  background: rgba(0,0,0,0.72);
+  padding: 4px 10px;
+  margin: 8px;
   text-transform: uppercase;
 }
-.cctv-play {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(245,197,24,0.15);
-  border: 2px solid var(--sulfur);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: var(--sulfur);
-  transition: all 0.3s;
-}
-.cctv-play::before {
-  content: '';
-  display: inline-block;
-  width: 0; height: 0;
-  border-left: 14px solid var(--sulfur);
-  border-top: 9px solid transparent;
-  border-bottom: 9px solid transparent;
-  margin-left: 4px;
-}
-.cctv-link:hover .cctv-play::before { border-left-color: var(--charcoal); }
-.cctv-frame::before {
-  content: 'CAM ' attr(data-cam) '  •  REC';
-  position: absolute;
-  top: 8px; left: 8px;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-  color: var(--confidential);
-  background: rgba(0,0,0,0.7);
-  padding: 3px 8px;
-  z-index: 2;
-}
-.cctv-frame::after {
-  content: '';
-  position: absolute;
-  top: 16px; right: 14px;
+.cctv-dot {
+  display: block;
   width: 8px; height: 8px;
   background: var(--confidential);
   border-radius: 50%;
+  margin: 12px 12px 0 0;
   animation: blink 1.5s ease-in-out infinite;
+}
+.cctv-label-bottom {
+  position: absolute;
+  bottom: 8px; left: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
+  color: rgba(245,197,24,0.7);
+  background: rgba(0,0,0,0.6);
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+/* Scanline effect over video */
+.cctv-frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
   z-index: 2;
+  pointer-events: none;
 }
 .cctv-panel { display: none; }
 .cctv-panel.active { display: block; }
@@ -657,50 +621,70 @@
 }
 .map-wrap {
   position: relative;
-  background: linear-gradient(180deg, #1a2129 0%, #0f1419 100%);
+  background: radial-gradient(ellipse at 50% 50%, #1a2535 0%, #0a0e14 100%);
   border-radius: 8px;
-  padding: 30px;
+  border: 1px solid rgba(245,197,24,0.2);
   box-shadow: var(--shadow-card);
   overflow: hidden;
+  padding: 0;
 }
-.world-map {
+.world-map-canvas {
   width: 100%;
   height: auto;
   display: block;
 }
-.world-map path { fill: rgba(245, 197, 24, 0.18); stroke: rgba(245, 197, 24, 0.4); stroke-width: 0.4; transition: fill 0.3s; }
-.hotspot {
-  fill: var(--confidential);
+/* Hotspot buttons floating over the canvas */
+.map-hotspot {
+  position: absolute;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
   cursor: pointer;
-  transform-origin: center;
-  filter: drop-shadow(0 0 6px var(--confidential));
+  transform: translate(-50%, -50%);
+  z-index: 5;
 }
-.hotspot circle.pulse {
-  fill: var(--confidential);
-  opacity: 0.5;
-  animation: hotpulse 2.2s ease-out infinite;
-  transform-origin: center;
+/* Hotspot visual ring (CSS, JS sets top/left) */
+.map-hotspot::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: var(--confidential);
+  border-radius: 50%;
+  box-shadow: 0 0 8px 2px var(--confidential);
 }
-@keyframes hotpulse {
-  0% { transform: scale(0.5); opacity: 0.6; }
-  100% { transform: scale(3.5); opacity: 0; }
+.map-hotspot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--confidential);
+  opacity: 0.6;
+  animation: hotspotPulse 2s ease-out infinite;
+}
+@keyframes hotspotPulse {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 .map-legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
   font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--bone);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: rgba(245,197,24,0.6);
+  text-transform: uppercase;
 }
-.map-legend .dot {
+.map-legend-dot {
   display: inline-block;
-  width: 12px; height: 12px;
+  width: 10px; height: 10px;
   background: var(--confidential);
   border-radius: 50%;
-  margin-right: 8px;
-  vertical-align: middle;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px var(--confidential);
+  animation: blink 1.8s ease-in-out infinite;
 }
 .hotspot-info {
   background: var(--manila);
@@ -1092,6 +1076,96 @@
   font-size: 0.7rem;
 }
 .agent-stats li span { flex: 1; color: var(--charcoal); }
+
+/* Real photo in agent-card */
+.agent-real-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+/* ── Rami villain card ── */
+.agent-card--rami {
+  border-color: #C9302C;
+  box-shadow: 6px 6px 0 #8B0000, 0 0 30px rgba(201,48,44,0.15);
+}
+.agent-card--rami:hover {
+  box-shadow: 10px 12px 0 #C9302C, 0 0 40px rgba(201,48,44,0.3);
+  transform: translate(-4px,-6px);
+}
+.rami-photo-wrap { position: relative; }
+
+/* Real rami photo (hidden behind overlay) */
+.rami-real {
+  filter: contrast(1.2) saturate(0.5);
+}
+
+/* Censorship overlay */
+.rami-censor-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.5s;
+}
+.rami-question-marks {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  color: #C9302C;
+  animation: blink 1.2s step-end infinite;
+  text-shadow: 0 0 20px rgba(201,48,44,0.8);
+  letter-spacing: 0.1em;
+}
+
+/* Hover: brief glitch showing real photo */
+.agent-card--rami:hover .rami-censor-overlay {
+  animation: ramiGlitch 0.15s steps(1) infinite;
+}
+@keyframes ramiGlitch {
+  0%   { opacity: 1; }
+  45%  { opacity: 1; }
+  50%  { opacity: 0; }
+  55%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.rami-body { background: #0a0505; color: #ccc; }
+.rami-name { color: #C9302C !important; font-family: var(--font-display) !important; }
+.agent-card--rami .agent-stats li span { color: #888; letter-spacing: 0.05em; }
+.agent-card--rami.rami-revealed .rami-bar { color: #C9302C; }
+
+.rami-egg-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  color: #C9302C;
+  margin-top: 10px;
+  text-align: center;
+  opacity: 0.6;
+}
+.rami-unlock-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 10px 8px;
+  background: transparent;
+  border: 2px solid #C9302C;
+  color: #C9302C;
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.rami-unlock-btn:hover {
+  background: #C9302C;
+  color: #000;
+}
 .library-card {
   background: var(--manila);
   color: var(--charcoal);

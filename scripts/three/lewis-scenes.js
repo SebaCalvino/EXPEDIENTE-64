@@ -43,13 +43,15 @@ window.E64.initCorrectScene = function(canvas) {
   s.scene.add(molecule);
 
   var controls = null;
-  if (THREE.OrbitControls) {
-    controls = new THREE.OrbitControls(s.camera, canvas);
+  if (typeof THREE !== 'undefined' && THREE.OrbitControls) {
+    controls = new THREE.OrbitControls(s.camera, s.renderer.domElement);
     controls.enableDamping   = true;
     controls.dampingFactor   = 0.08;
     controls.autoRotate      = true;
     controls.autoRotateSpeed = 1.5;
     controls.enablePan       = false;
+    controls.minDistance     = 3;
+    controls.maxDistance     = 12;
   }
 
   // Sparkles
