@@ -1,90 +1,86 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
-import { createSO2, createScene, fitCameraToCanvas } from './molecule-builder.js';
+window.E64 = window.E64 || {};
 
-export function initSuspectScene(canvas) {
-  const { scene, renderer, camera } = createScene({ canvas, transparent: true });
-  camera.position.set(0, 0.6, 5);
+window.E64.initSuspectScene = function(canvas) {
+  var MB = window.E64.MoleculeBuilder;
+  var s  = MB.createScene(canvas, true);
+  s.camera.position.set(0, 0.6, 5);
 
-  const molecule = createSO2({ scale: 1.1, withLonePair: true });
-  scene.add(molecule);
+  var molecule = MB.createSO2({ scale: 1.1, withLonePair: true });
+  s.scene.add(molecule);
 
-  const controls = new OrbitControls(camera, canvas);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.08;
-  controls.autoRotate = true;
-  controls.autoRotateSpeed = 1.0;
-  controls.enablePan = false;
-  controls.minDistance = 3;
-  controls.maxDistance = 10;
+  var controls = null;
+  if (THREE.OrbitControls) {
+    controls = new THREE.OrbitControls(s.camera, canvas);
+    controls.enableDamping   = true;
+    controls.dampingFactor   = 0.08;
+    controls.autoRotate      = true;
+    controls.autoRotateSpeed = 1.0;
+    controls.enablePan       = false;
+    controls.minDistance     = 3;
+    controls.maxDistance     = 10;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) controls.autoRotate = false;
+  }
 
-  let isVisible = false;
-  let rafId = null;
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduce) controls.autoRotate = false;
-
-  const resize = () => fitCameraToCanvas(camera, renderer, canvas);
-  const ro = new ResizeObserver(resize);
+  var isVisible = false;
+  var rafId = null;
+  var ro = new ResizeObserver(function() { MB.fitCamera(s.camera, s.renderer, canvas); });
   ro.observe(canvas);
-  resize();
+  MB.fitCamera(s.camera, s.renderer, canvas);
 
-  const animate = () => {
+  function animate() {
     if (!isVisible) { rafId = null; return; }
-    controls.update();
-    renderer.render(scene, camera);
+    if (!controls) molecule.rotation.y += 0.008;
+    if (controls) controls.update();
+    s.renderer.render(s.scene, s.camera);
     rafId = requestAnimationFrame(animate);
-  };
+  }
 
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      isVisible = e.isIntersecting;
-      if (isVisible && !rafId) animate();
-    });
-  }, { threshold: 0.1 });
-  io.observe(canvas);
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        isVisible = e.isIntersecting;
+        if (isVisible && !rafId) animate();
+      });
+    }, { threshold: 0.1 }).observe(canvas);
+  } else {
+    isVisible = true; animate();
+  }
+};
 
-  return { scene, renderer, camera, molecule, controls };
-}
+window.E64.initAmbientBackgroundScene = function(canvas) {
+  var MB = window.E64.MoleculeBuilder;
+  var s  = MB.createScene(canvas, true);
+  s.camera.position.set(0, 0, 7);
 
-export function initAmbientBackgroundScene(canvas) {
-  const { scene, renderer, camera } = createScene({ canvas, transparent: true });
-  camera.position.set(0, 0, 7);
-
-  const molecule = createSO2({ scale: 2.2, withLonePair: true });
-  molecule.traverse(o => {
-    if (o.material) {
-      o.material.transparent = true;
-      o.material.opacity = 0.18;
-    }
+  var molecule = MB.createSO2({ scale: 2.2, withLonePair: true });
+  molecule.traverse(function(o) {
+    if (o.material) { o.material.transparent = true; o.material.opacity = 0.18; }
   });
-  scene.add(molecule);
+  s.scene.add(molecule);
 
-  let isVisible = false;
-  let rafId = null;
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var isVisible = false;
+  var rafId = null;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const resize = () => fitCameraToCanvas(camera, renderer, canvas);
-  const ro = new ResizeObserver(resize);
+  var ro = new ResizeObserver(function() { MB.fitCamera(s.camera, s.renderer, canvas); });
   ro.observe(canvas);
-  resize();
+  MB.fitCamera(s.camera, s.renderer, canvas);
 
-  const animate = () => {
+  function animate() {
     if (!isVisible) { rafId = null; return; }
-    if (!reduce) {
-      molecule.rotation.y += 0.003;
-      molecule.rotation.x += 0.001;
-    }
-    renderer.render(scene, camera);
+    if (!reduce) { molecule.rotation.y += 0.003; molecule.rotation.x += 0.001; }
+    s.renderer.render(s.scene, s.camera);
     rafId = requestAnimationFrame(animate);
-  };
+  }
 
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      isVisible = e.isIntersecting;
-      if (isVisible && !rafId) animate();
-    });
-  });
-  io.observe(canvas);
-
-  return { scene, renderer, camera };
-}
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        isVisible = e.isIntersecting;
+        if (isVisible && !rafId) animate();
+      });
+    }).observe(canvas);
+  } else {
+    isVisible = true; animate();
+  }
+};

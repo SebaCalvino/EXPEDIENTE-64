@@ -15,6 +15,9 @@
   <link rel="stylesheet" href="styles/games.css">
   <link rel="stylesheet" href="styles/animations.css">
 
+  <!-- Three.js UMD (r148 — último con examples/js/OrbitControls) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
@@ -526,6 +529,21 @@
     <p>"La química no juzga: comprende. Cada átomo cuenta una historia. El SO₂ es ambivalente como la humanidad misma — capaz de destruir y de construir. Tu rol como investigador es ver más allá del prejuicio."</p>
   </div>
 
-  <script type="module" src="scripts/main.js"></script>
+  <!-- Scripts en orden de dependencias (sin módulos ES6) -->
+  <script src="scripts/data/glossary.js"></script>
+  <script src="scripts/data/timeline-events.js"></script>
+  <script src="scripts/data/quiz-questions.js"></script>
+  <script src="scripts/three/molecule-builder.js"></script>
+  <script src="scripts/three/hero-scene.js"></script>
+  <script src="scripts/three/suspect-scene.js"></script>
+  <script src="scripts/three/lewis-scenes.js"></script>
+  <script src="scripts/cursor.js"></script>
+  <script src="scripts/parallax.js"></script>
+  <script src="scripts/games/sulfusnake.js"></script>
+  <script src="scripts/games/acid-defense.js"></script>
+  <script src="scripts/games/memotest.js"></script>
+  <script src="scripts/games/quiz.js"></script>
+  <script src="scripts/games/lewis-builder.js"></script>
+  <script src="scripts/main.js"></script>
 </body>
 </html>
