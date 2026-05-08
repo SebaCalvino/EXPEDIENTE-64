@@ -1,28 +1,16 @@
-import { initCursor } from './cursor.js';
-import { initParallax, initReveal } from './parallax.js';
-import { initHeroScene } from './three/hero-scene.js';
-import { initSuspectScene, initAmbientBackgroundScene } from './three/suspect-scene.js';
-import { GLOSSARY } from './data/glossary.js';
-import { TIMELINE_EVENTS } from './data/timeline-events.js';
+/* Main — sin módulos ES6, funciona desde file:// */
+window.E64 = window.E64 || {};
 
-import { buildLewisGame } from './games/lewis-builder.js';
-import { buildSulfusnake } from './games/sulfusnake.js';
-import { buildAcidDefense } from './games/acid-defense.js';
-import { buildMemotest } from './games/memotest.js';
-import { buildQuiz } from './games/quiz.js';
-
-window.addEventListener('DOMContentLoaded', init);
-
-function init() {
-  // --- Loading screen ---
-  setTimeout(() => {
-    const loader = document.getElementById('loader');
+window.addEventListener('DOMContentLoaded', function() {
+  // Loader: CSS animation ya lo descarta; JS lo cierra también para mayor compatibilidad
+  setTimeout(function() {
+    var loader = document.getElementById('loader');
     if (loader) loader.classList.add('gone');
-  }, 2400);
+  }, 2500);
 
-  initCursor();
-  initParallax();
-  initReveal();
+  window.E64.initCursor();
+  window.E64.initParallax();
+  window.E64.initReveal();
   initNavigation();
   initSlogan();
   initHero();
@@ -36,335 +24,331 @@ function init() {
   initClosing();
   initGames();
   initEasterEggs();
-  initLucide();
-}
-
-function initLucide() {
   if (window.lucide) window.lucide.createIcons();
-}
+});
 
+/* ---- Navigation ---- */
 function initNavigation() {
-  const nav = document.querySelector('.nav');
-  const links = document.querySelector('.nav-links');
-  const burger = document.querySelector('.hamburger');
-  burger?.addEventListener('click', () => {
-    burger.classList.toggle('open');
-    links.classList.toggle('open');
-  });
-  links?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    burger?.classList.remove('open');
-    links.classList.remove('open');
-  }));
-
-  let lastY = 0;
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
+  var nav    = document.querySelector('.nav');
+  var links  = document.querySelector('.nav-links');
+  var burger = document.querySelector('.hamburger');
+  if (burger) {
+    burger.addEventListener('click', function() {
+      burger.classList.toggle('open');
+      links.classList.toggle('open');
+    });
+  }
+  if (links) {
+    links.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        burger && burger.classList.remove('open');
+        links.classList.remove('open');
+      });
+    });
+  }
+  var lastY = 0;
+  window.addEventListener('scroll', function() {
+    var y = window.scrollY;
     if (y > 100 && y > lastY) nav.classList.add('hidden');
     else nav.classList.remove('hidden');
     lastY = y;
   }, { passive: true });
 }
 
+/* ---- Typewriter slogan ---- */
 function initSlogan() {
-  const el = document.getElementById('slogan-text');
+  var el   = document.getElementById('slogan-text');
   if (!el) return;
-  const text = 'Pruebas, no prejuicios.';
-  let i = 0;
-  setTimeout(() => {
-    const interval = setInterval(() => {
+  var text = 'Pruebas, no prejuicios.';
+  var i    = 0;
+  setTimeout(function() {
+    var iv = setInterval(function() {
       el.textContent = text.slice(0, i);
       i++;
       if (i > text.length) {
-        clearInterval(interval);
-        el.insertAdjacentHTML('beforeend', '<span class="cursor">|</span>');
+        clearInterval(iv);
+        var cur = document.createElement('span');
+        cur.className = 'cursor'; cur.textContent = '|';
+        el.appendChild(cur);
       }
     }, 80);
-  }, 800);
+  }, 900);
 }
 
+/* ---- Hero 3D ---- */
 function initHero() {
-  const c = document.getElementById('hero-canvas');
-  if (c) initHeroScene(c);
+  var c = document.getElementById('hero-canvas');
+  if (c && window.E64.initHeroScene) window.E64.initHeroScene(c);
 }
 
+/* ---- Suspect 3D + Glossary ---- */
 function initSuspect() {
-  const c = document.getElementById('suspect-canvas');
-  if (c) initSuspectScene(c);
+  var c = document.getElementById('suspect-canvas');
+  if (c && window.E64.initSuspectScene) window.E64.initSuspectScene(c);
 
-  // glossary tooltips
-  document.querySelectorAll('.gloss').forEach(el => {
-    const term = el.dataset.term || el.textContent.toLowerCase().trim();
-    const def = GLOSSARY[term];
+  var GL = window.E64.GLOSSARY || {};
+  document.querySelectorAll('.gloss').forEach(function(el) {
+    var term = el.dataset.term || el.textContent.toLowerCase().trim();
+    var def  = GL[term];
     if (def) el.setAttribute('data-tip', def);
     el.setAttribute('tabindex', '0');
   });
 }
 
+/* ---- Generic tabs (suspect section) ---- */
 function initTabs() {
-  document.querySelectorAll('.tabs').forEach(group => {
-    const btns = group.querySelectorAll('.tab-btn');
-    const panels = group.querySelectorAll('.tab-panel');
-    btns.forEach(b => b.addEventListener('click', () => {
-      btns.forEach(x => x.setAttribute('aria-selected', 'false'));
-      panels.forEach(p => p.classList.remove('active'));
-      b.setAttribute('aria-selected', 'true');
-      const panel = group.querySelector(`#${b.dataset.target}`);
-      panel?.classList.add('active');
-    }));
-  });
-}
-
-function initTimeline() {
-  const track = document.getElementById('timeline-track');
-  if (!track) return;
-  TIMELINE_EVENTS.forEach((ev, i) => {
-    const item = document.createElement('div');
-    item.className = 'timeline-item reveal';
-    item.innerHTML = `
-      <div class="polaroid">
-        <div class="polaroid-img">${ev.icon}</div>
-        <div class="polaroid-year">${ev.year}</div>
-        <div class="polaroid-title">${ev.title}</div>
-        <p class="polaroid-desc">${ev.description}</p>
-        <span class="polaroid-tag">${ev.tag}</span>
-      </div>
-      <div class="timeline-pin"></div>
-      <div class="timeline-spacer"></div>
-    `;
-    track.appendChild(item);
-  });
-  // re-init reveal for new items
-  initReveal();
-}
-
-function initFolder() {
-  const tabs = document.querySelectorAll('.folder-tab');
-  const panels = document.querySelectorAll('.folder-panel');
-  tabs.forEach(t => t.addEventListener('click', () => {
-    tabs.forEach(x => x.setAttribute('aria-selected', 'false'));
-    panels.forEach(p => p.classList.remove('active'));
-    t.setAttribute('aria-selected', 'true');
-    const panel = document.getElementById(t.dataset.target);
-    panel?.classList.add('active');
-    if (window.gsap) {
-      window.gsap.fromTo(panel, { x: 30, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5 });
-    }
-  }));
-}
-
-function initVideos() {
-  const tabs = document.querySelectorAll('.cctv-tab');
-  const panels = document.querySelectorAll('.cctv-panel');
-  tabs.forEach(t => t.addEventListener('click', () => {
-    tabs.forEach(x => x.setAttribute('aria-selected', 'false'));
-    panels.forEach(p => p.classList.remove('active'));
-    t.setAttribute('aria-selected', 'true');
-    document.getElementById(t.dataset.target)?.classList.add('active');
-  }));
-}
-
-const MAP_DATA = {
-  china: { name: 'China', emisiones: '~10 Mt/año (2020)', quote: 'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO₂ urbano.' },
-  india: { name: 'India', emisiones: '~8 Mt/año', quote: 'Lidera hoy las emisiones por quema de carbón. La OMS estima 1,7M muertes prematuras anuales.' },
-  usa: { name: 'EE.UU.', emisiones: '~2 Mt/año', quote: 'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Demuestra que la regulación funciona.' },
-  europe: { name: 'Europa', emisiones: '~2 Mt/año', quote: 'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
-  argentina: { name: 'Argentina · Dock Sud', emisiones: 'Polo petroquímico crítico', quote: '"Una de las mayores concentraciones urbanas de SO₂ del país; estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos."' }
-};
-
-function initMap() {
-  document.querySelectorAll('.hotspot').forEach(h => {
-    h.addEventListener('click', () => openHotspot(h.dataset.region));
-  });
-}
-
-function openHotspot(region) {
-  const data = MAP_DATA[region];
-  if (!data) return;
-  const html = `
-    <div class="hotspot-info">
-      <h4>${data.name}</h4>
-      <p><strong>Emisiones:</strong> ${data.emisiones}</p>
-      <blockquote>${data.quote}</blockquote>
-    </div>
-  `;
-  openModal(html, false);
-}
-
-function initVoting() {
-  const guilty = document.getElementById('vote-guilty');
-  const innocent = document.getElementById('vote-innocent');
-  const stats = document.getElementById('vote-stats');
-  const fillI = document.getElementById('vote-fill-innocent');
-  const fillG = document.getElementById('vote-fill-guilty');
-  if (!guilty || !innocent) return;
-
-  const update = () => {
-    const g = parseInt(localStorage.getItem('vote_guilty') || '0', 10);
-    const i = parseInt(localStorage.getItem('vote_innocent') || '0', 10);
-    const total = g + i || 1;
-    const gp = Math.round((g / total) * 100);
-    const ip = 100 - gp;
-    stats.innerHTML = `<b style="color:var(--acid-green)">${ip}% Inocente</b> · <b style="color:var(--confidential)">${gp}% Culpable</b> · ${g + i} votos`;
-    fillI.style.width = ip + '%';
-    fillG.style.width = gp + '%';
-  };
-  guilty.addEventListener('click', () => {
-    if (localStorage.getItem('voted')) return;
-    localStorage.setItem('vote_guilty', (parseInt(localStorage.getItem('vote_guilty') || '0', 10) + 1));
-    localStorage.setItem('voted', 'guilty');
-    update();
-  });
-  innocent.addEventListener('click', () => {
-    if (localStorage.getItem('voted')) return;
-    localStorage.setItem('vote_innocent', (parseInt(localStorage.getItem('vote_innocent') || '0', 10) + 1));
-    localStorage.setItem('voted', 'innocent');
-    update();
-    fireConfetti();
-  });
-  // seed initial
-  if (!localStorage.getItem('vote_guilty') && !localStorage.getItem('vote_innocent')) {
-    localStorage.setItem('vote_guilty', '34');
-    localStorage.setItem('vote_innocent', '52');
-  }
-  update();
-}
-
-function initClosing() {
-  const c = document.getElementById('closing-canvas');
-  if (c) initAmbientBackgroundScene(c);
-}
-
-const GAMES = {
-  lewis: { title: 'Lewis Builder', build: buildLewisGame },
-  snake: { title: 'Sulfusnake', build: buildSulfusnake },
-  acid: { title: 'Ácido Defense', build: buildAcidDefense },
-  memo: { title: 'Memotest', build: buildMemotest },
-  quiz: { title: 'Quiz', build: buildQuiz }
-};
-
-function initGames() {
-  document.querySelectorAll('[data-game]').forEach(card => {
-    card.addEventListener('click', () => {
-      const g = card.dataset.game;
-      if (!GAMES[g]) return;
-      const root = document.createElement('div');
-      GAMES[g].build(root);
-      openModal(root, g === 'lewis');
+  document.querySelectorAll('.tabs').forEach(function(group) {
+    var btns   = group.querySelectorAll('.tab-btn');
+    var panels = group.querySelectorAll('.tab-panel');
+    btns.forEach(function(b) {
+      b.addEventListener('click', function() {
+        btns.forEach(function(x) { x.setAttribute('aria-selected','false'); });
+        panels.forEach(function(p) { p.classList.remove('active'); });
+        b.setAttribute('aria-selected','true');
+        var target = group.querySelector('#'+b.dataset.target);
+        if (target) target.classList.add('active');
+      });
     });
   });
 }
 
-// === Modal ===
-let activeCleanup = null;
-export function openModal(content, dark = false) {
-  const backdrop = document.getElementById('modal-backdrop');
-  const win = document.getElementById('modal-window');
+/* ---- Timeline ---- */
+function initTimeline() {
+  var track  = document.getElementById('timeline-track');
+  var events = window.E64.TIMELINE_EVENTS || [];
+  if (!track) return;
+  events.forEach(function(ev) {
+    var item = document.createElement('div');
+    item.className = 'timeline-item reveal';
+    item.innerHTML =
+      '<div class="polaroid">' +
+        '<div class="polaroid-img">' + ev.icon + '</div>' +
+        '<div class="polaroid-year">' + ev.year + '</div>' +
+        '<div class="polaroid-title">' + ev.title + '</div>' +
+        '<p class="polaroid-desc">' + ev.description + '</p>' +
+        '<span class="polaroid-tag">' + ev.tag + '</span>' +
+      '</div>' +
+      '<div class="timeline-pin"></div>' +
+      '<div class="timeline-spacer"></div>';
+    track.appendChild(item);
+  });
+  window.E64.initReveal();
+}
+
+/* ---- Folder tabs ---- */
+function initFolder() {
+  var tabs   = document.querySelectorAll('.folder-tab');
+  var panels = document.querySelectorAll('.folder-panel');
+  tabs.forEach(function(t) {
+    t.addEventListener('click', function() {
+      tabs.forEach(function(x)   { x.setAttribute('aria-selected','false'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      t.setAttribute('aria-selected','true');
+      var panel = document.getElementById(t.dataset.target);
+      if (panel) panel.classList.add('active');
+    });
+  });
+  // activate first tab
+  if (tabs[0]) { tabs[0].setAttribute('aria-selected','true'); }
+  var first = document.querySelector('.folder-panel');
+  if (first) first.classList.add('active');
+}
+
+/* ---- CCTV / Videos tabs ---- */
+function initVideos() {
+  var tabs   = document.querySelectorAll('.cctv-tab');
+  var panels = document.querySelectorAll('.cctv-panel');
+  tabs.forEach(function(t) {
+    t.addEventListener('click', function() {
+      tabs.forEach(function(x)   { x.setAttribute('aria-selected','false'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      t.setAttribute('aria-selected','true');
+      var panel = document.getElementById(t.dataset.target);
+      if (panel) panel.classList.add('active');
+    });
+  });
+}
+
+/* ---- Map hotspots ---- */
+var MAP_DATA = {
+  china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO₂ urbano.' },
+  india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbón. La OMS estima 1,7M muertes prematuras anuales.' },
+  usa:       { name:'EE.UU.',           emisiones:'~2 Mt/año',         quote:'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Donde hay regulación, el SO₂ no es problema.' },
+  europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
+  argentina: { name:'Argentina · Dock Sud', emisiones:'Polo petroquímico crítico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerías de La Plata.' }
+};
+function initMap() {
+  document.querySelectorAll('.hotspot').forEach(function(h) {
+    h.addEventListener('click', function() { openHotspot(h.dataset.region); });
+    h.addEventListener('keypress', function(e) { if (e.key==='Enter') openHotspot(h.dataset.region); });
+  });
+}
+function openHotspot(region) {
+  var d = MAP_DATA[region]; if (!d) return;
+  openModal('<div class="hotspot-info"><h4>'+d.name+'</h4><p><strong>Emisiones:</strong> '+d.emisiones+'</p><blockquote>'+d.quote+'</blockquote></div>', false);
+}
+
+/* ---- Voting ---- */
+function initVoting() {
+  var guilty   = document.getElementById('vote-guilty');
+  var innocent = document.getElementById('vote-innocent');
+  var stats    = document.getElementById('vote-stats');
+  var fillI    = document.getElementById('vote-fill-innocent');
+  var fillG    = document.getElementById('vote-fill-guilty');
+  if (!guilty || !innocent) return;
+
+  if (!localStorage.getItem('vote_guilty') && !localStorage.getItem('vote_innocent')) {
+    localStorage.setItem('vote_guilty',  '34');
+    localStorage.setItem('vote_innocent','52');
+  }
+
+  function update() {
+    var g = parseInt(localStorage.getItem('vote_guilty')  || '0', 10);
+    var i = parseInt(localStorage.getItem('vote_innocent')|| '0', 10);
+    var total = (g + i) || 1;
+    var gp = Math.round((g/total)*100), ip = 100 - gp;
+    stats.innerHTML = '<b style="color:var(--acid-green)">' + ip + '% Inocente</b> · <b style="color:var(--confidential)">' + gp + '% Culpable</b> · ' + (g+i) + ' votos';
+    if (fillI) fillI.style.width = ip + '%';
+    if (fillG) fillG.style.width = gp + '%';
+  }
+
+  guilty.addEventListener('click', function() {
+    if (localStorage.getItem('voted')) return;
+    localStorage.setItem('vote_guilty', parseInt(localStorage.getItem('vote_guilty')||'0',10) + 1);
+    localStorage.setItem('voted','guilty'); update();
+  });
+  innocent.addEventListener('click', function() {
+    if (localStorage.getItem('voted')) return;
+    localStorage.setItem('vote_innocent', parseInt(localStorage.getItem('vote_innocent')||'0',10) + 1);
+    localStorage.setItem('voted','innocent'); update();
+    window.E64.fireConfetti();
+  });
+  update();
+}
+
+/* ---- Closing background ---- */
+function initClosing() {
+  var c = document.getElementById('closing-canvas');
+  if (c && window.E64.initAmbientBackgroundScene) window.E64.initAmbientBackgroundScene(c);
+}
+
+/* ---- Games ---- */
+var GAME_MAP = {
+  lewis: 'buildLewisGame',
+  snake: 'buildSulfusnake',
+  acid:  'buildAcidDefense',
+  memo:  'buildMemotest',
+  quiz:  'buildQuiz'
+};
+function initGames() {
+  document.querySelectorAll('[data-game]').forEach(function(card) {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function() {
+      var id  = card.dataset.game;
+      var fn  = window.E64[GAME_MAP[id]];
+      if (!fn) return;
+      var root = document.createElement('div');
+      fn(root);
+      openModal(root, id === 'lewis');
+    });
+    card.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') card.click();
+    });
+  });
+}
+
+/* ---- Modal ---- */
+var _activeCleanup = null;
+function openModal(content, dark) {
+  var backdrop = document.getElementById('modal-backdrop');
+  var win      = document.getElementById('modal-window');
   win.innerHTML = '<button class="modal-close" aria-label="Cerrar">✕</button>';
-  win.classList.toggle('dark', dark);
+  win.classList.toggle('dark', !!dark);
   if (typeof content === 'string') {
-    const wrap = document.createElement('div');
+    var wrap = document.createElement('div');
     wrap.style.padding = '40px';
     wrap.innerHTML = content;
     win.appendChild(wrap);
   } else {
     win.appendChild(content);
-    activeCleanup = content._cleanup;
+    _activeCleanup = content._cleanup || null;
   }
   backdrop.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeModal() {
-  const backdrop = document.getElementById('modal-backdrop');
+  var backdrop = document.getElementById('modal-backdrop');
   backdrop.classList.remove('open');
   document.body.style.overflow = '';
-  if (activeCleanup) { try { activeCleanup(); } catch (e) {} activeCleanup = null; }
+  if (_activeCleanup) { try { _activeCleanup(); } catch(e) {} _activeCleanup = null; }
 }
-document.addEventListener('click', e => {
-  if (e.target.classList?.contains('modal-close')) closeModal();
-  if (e.target.id === 'modal-backdrop') closeModal();
+document.addEventListener('click', function(e) {
+  if (e.target && (e.target.classList.contains('modal-close') || e.target.id==='modal-backdrop')) closeModal();
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', function(e) { if (e.key==='Escape') closeModal(); });
 
-// === Confetti ===
-export function fireConfetti(count = 80, colors = ['#F5C518', '#C9302C', '#84CC16', '#FAFAF7']) {
-  const canvas = document.getElementById('confetti-canvas');
+/* ---- Confetti ---- */
+window.E64.fireConfetti = function(count, colors) {
+  count  = count  || 80;
+  colors = colors || ['#F5C518','#C9302C','#84CC16','#FAFAF7'];
+  var canvas = document.getElementById('confetti-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
+  var ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
   canvas.height = window.innerHeight;
-  const parts = [];
-  for (let i = 0; i < count; i++) {
+  var parts = [];
+  for (var i=0; i<count; i++) {
     parts.push({
-      x: Math.random() * canvas.width,
-      y: -20 - Math.random() * 100,
-      vx: (Math.random() - 0.5) * 6,
-      vy: 3 + Math.random() * 5,
-      size: 6 + Math.random() * 8,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rot: Math.random() * Math.PI,
-      vrot: (Math.random() - 0.5) * 0.3
+      x: Math.random()*canvas.width, y: -20-Math.random()*100,
+      vx: (Math.random()-0.5)*6, vy: 3+Math.random()*5,
+      size: 6+Math.random()*8,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*Math.PI, vrot: (Math.random()-0.5)*0.3
     });
   }
-  let t = 0;
-  const tick = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    parts.forEach(p => {
-      p.x += p.vx; p.y += p.vy; p.vy += 0.12; p.rot += p.vrot;
-      ctx.save();
-      ctx.translate(p.x, p.y);
-      ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.5);
+  var frame = 0;
+  (function tick() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    parts.forEach(function(p) {
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.12; p.rot+=p.vrot;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.5);
       ctx.restore();
     });
-    t++;
-    if (t < 200) requestAnimationFrame(tick);
-    else ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-  tick();
-}
+    frame++;
+    if (frame<200) requestAnimationFrame(tick);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
+};
 
-// === Easter eggs ===
+/* ---- Easter eggs ---- */
 function initEasterEggs() {
-  // Konami
-  const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
-  let pos = 0;
-  document.addEventListener('keydown', e => {
-    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    if (k === code[pos]) {
-      pos++;
-      if (pos === code.length) {
-        showDeclassified();
-        pos = 0;
-      }
-    } else {
-      pos = (k === code[0]) ? 1 : 0;
-    }
+  var code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  var pos  = 0;
+  document.addEventListener('keydown', function(e) {
+    var k = e.key.length===1 ? e.key.toLowerCase() : e.key;
+    if (k === code[pos]) { pos++; if (pos===code.length) { showDeclassified(); pos=0; } }
+    else pos = (k===code[0]) ? 1 : 0;
   });
-
-  // 10x stamp click
-  let stampClicks = 0;
-  document.querySelectorAll('[data-stamp-egg]').forEach(s => {
-    s.addEventListener('click', () => {
+  var stampClicks = 0;
+  document.querySelectorAll('[data-stamp-egg]').forEach(function(s) {
+    s.addEventListener('click', function() {
       stampClicks++;
-      if (stampClicks >= 10) {
-        showSecretEnvelope();
-        stampClicks = 0;
-      }
+      if (stampClicks >= 10) { showSecretEnvelope(); stampClicks=0; }
     });
   });
 }
-
 function showDeclassified() {
-  const overlay = document.getElementById('declass-overlay');
-  overlay?.classList.add('show');
-  fireConfetti(120);
-  overlay?.querySelector('button')?.addEventListener('click', () => overlay.classList.remove('show'), { once: true });
+  var o = document.getElementById('declass-overlay');
+  if (o) o.classList.add('show');
+  window.E64.fireConfetti(120);
+  var btn = o && o.querySelector('button');
+  if (btn) btn.onclick = function() { o.classList.remove('show'); };
 }
-
 function showSecretEnvelope() {
-  const env = document.getElementById('secret-envelope');
-  env?.classList.add('show');
-  fireConfetti(50, ['#F5C518', '#F5C518', '#FAFAF7']);
-  env?.querySelector('.close-secret')?.addEventListener('click', () => env.classList.remove('show'), { once: true });
+  var e = document.getElementById('secret-envelope');
+  if (e) e.classList.add('show');
+  window.E64.fireConfetti(50, ['#F5C518','#F5C518','#FAFAF7']);
+  var btn = e && e.querySelector('.close-secret');
+  if (btn) btn.onclick = function() { e.classList.remove('show'); };
 }
