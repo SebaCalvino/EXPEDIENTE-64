@@ -1,13 +1,8 @@
 /* rami.js — Secret page script */
 (function() {
 
-  /* ── Access check ── */
-  var eggsUnlocked = 0;
-  var EGGS = ['rami_egg_snake','rami_egg_konami','rami_egg_stamp','rami_egg_timeline',
-    'rami_egg_quiz','rami_egg_map','rami_egg_lewis','rami_egg_console','rami_egg_idle'];
-  EGGS.forEach(function(e) { if (localStorage.getItem(e) === 'true') eggsUnlocked++; });
-
-  if (eggsUnlocked < 9) {
+  /* ── Access check — usa sessionStorage (válido sólo en la misma sesión) ── */
+  if (sessionStorage.getItem('rami_all_unlocked') !== '1') {
     showAccessDenied();
     return;
   }

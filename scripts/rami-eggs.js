@@ -2,43 +2,38 @@ window.E64 = window.E64 || {};
 
 (function() {
   var EGGS = [
-    'rami_egg_snake',    /* Comer a Rami en Sulfusnake */
-    'rami_egg_konami',   /* Código Konami */
-    'rami_egg_stamp',    /* 10 clicks en la bibliografía de Chang */
-    'rami_egg_timeline', /* 7 clicks en "1991" en la timeline */
-    'rami_egg_quiz',     /* Sacar 0/10 en el quiz */
-    'rami_egg_map',      /* 5 clicks sobre Dock Sud */
-    'rami_egg_lewis',    /* Resolver Lewis en menos de 15s */
-    'rami_egg_console',  /* Escribir "rami" en consola */
-    'rami_egg_idle'      /* 3 minutos sin tocar nada */
+    'rami_egg_snake',
+    'rami_egg_konami',
+    'rami_egg_stamp',
+    'rami_egg_timeline',
+    'rami_egg_quiz',
+    'rami_egg_map',
+    'rami_egg_lewis',
+    'rami_egg_console',
+    'rami_egg_idle'
   ];
 
-  /* Reset all eggs on every page load */
+  /* In-memory only — resets on every page load, no localStorage */
+  var unlockedSet = {};
+
+  /* Also wipe any stale localStorage entries so old data never leaks */
   EGGS.forEach(function(egg) { localStorage.removeItem(egg); });
 
-  function getUnlocked() {
-    var unlocked = [];
-    EGGS.forEach(function(egg) {
-      if (localStorage.getItem(egg) === 'true') unlocked.push(egg);
-    });
-    return unlocked;
-  }
-
   function countUnlocked() {
-    return getUnlocked().length;
+    return Object.keys(unlockedSet).length;
   }
 
   function isUnlocked(egg) {
-    return localStorage.getItem(egg) === 'true';
+    return !!unlockedSet[egg];
   }
 
   function unlockEgg(egg) {
-    if (isUnlocked(egg)) return; /* Already unlocked */
-    localStorage.setItem(egg, 'true');
+    if (isUnlocked(egg)) return;
+    unlockedSet[egg] = true;
     var n = countUnlocked();
     showEggNotification(n);
     updateRamiCard(n);
-    if (n >= 9) revealRamiCard();
+    if (n >= EGGS.length) revealRamiCard();
   }
 
   function showEggNotification(n) {
@@ -114,6 +109,8 @@ window.E64 = window.E64 || {};
   }
 
   function revealRamiCard() {
+    window.E64.ramiUnlocked = true;
+    sessionStorage.setItem('rami_all_unlocked', '1');
     var card = document.querySelector('.agent-card[data-agent="rami"]');
     if (!card) return;
 
@@ -154,18 +151,15 @@ window.E64 = window.E64 || {};
   }
 
   /* Public API */
-  window.E64.unlockEgg    = unlockEgg;
+  window.E64.unlockEgg     = unlockEgg;
   window.E64.isEggUnlocked = isUnlocked;
-  window.E64.countEggs    = countUnlocked;
-  window.E64.refreshRamiCard = function() { updateRamiCard(countUnlocked()); };
+  window.E64.countEggs     = countUnlocked;
+  /* Flag para rami.html — se setea en sessionStorage cuando se completan todos */
+  window.E64.ramiUnlocked  = false;
 
-  /* Init: refresh card state on load */
+  /* Init: always start locked (n=0 on fresh load) */
   window.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-      var n = countUnlocked();
-      updateRamiCard(n);
-      if (n >= 9) revealRamiCard();
-    }, 500);
+    updateRamiCard(0);
   });
 
   /* ── Idle egg: 2 min without interaction ── */
