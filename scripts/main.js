@@ -511,7 +511,6 @@ window.E64.fireConfetti = function(count, colors) {
 };
 
 /* ---- Easter eggs ---- */
-var _guiltyStreak = 0;
 
 function initEasterEggs() {
   /* Konami → Rami dark flash */
@@ -534,9 +533,6 @@ function initEasterEggs() {
 
   /* Timeline 1991 clicks → 7× */
   initTimelineEgg();
-
-  /* Voting streak egg */
-  initVotingEgg();
 }
 
 function showRamiKonami() {
@@ -544,7 +540,7 @@ function showRamiKonami() {
   var overlay = document.createElement('div');
   overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;';
   var txt = document.createElement('p');
-  txt.textContent = 'Él te está mirando.';
+  txt.textContent = 'I SEE YOU';
   txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:0.2em;text-align:center;animation:shake 0.3s infinite;';
   overlay.appendChild(txt);
   document.body.appendChild(overlay);
@@ -553,7 +549,7 @@ function showRamiKonami() {
   /* Subliminal Rami at 2s */
   setTimeout(function() {
     var img = document.createElement('img');
-    img.src = 'assets/img/ramapita1.png';
+    img.src = 'assets/img/sebastiancalvino.png';
     img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
     overlay.appendChild(img);
     requestAnimationFrame(function() { img.style.opacity = '1'; });
@@ -620,21 +616,6 @@ function triggerTimeline1991Egg(polaroid) {
   }, 2800);
 }
 
-function initVotingEgg() {
-  /* Watch for 6 consecutive guilty votes */
-  document.addEventListener('click', function(e) {
-    var btn = e.target.closest('#vote-guilty');
-    if (btn) {
-      _guiltyStreak++;
-      if (_guiltyStreak >= 6) {
-        _guiltyStreak = 0;
-        triggerVotingEgg();
-      }
-    }
-    var innBtn = e.target.closest('#vote-innocent');
-    if (innBtn) _guiltyStreak = 0;
-  });
-}
 
 function triggerVotingEgg() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_voting');

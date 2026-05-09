@@ -54,7 +54,7 @@ window.E64.buildSulfusnake = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/ramapita1.png';
+    img.src = 'assets/img/sebastiancalvino.png';
   })();
 
   function reset() {
@@ -71,13 +71,13 @@ window.E64.buildSulfusnake = function(container) {
 
   function spawnFood() {
     var r = Math.random();
-    /* 0.7% chance of Rami spawn */
+    /* 5% chance of Rami spawn */
     var type;
-    if (r < 0.007) {
+    if (r < 0.05) {
       type = 'rami';
-    } else if (r < 0.05 + 0.007) {
+    } else if (r < 0.05 + 0.05) {
       type = 'water';
-    } else if (r < 0.12 + 0.007) {
+    } else if (r < 0.12 + 0.05) {
       type = 'vanadium';
     } else {
       type = 'oxygen';
