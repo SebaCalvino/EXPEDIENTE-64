@@ -13,6 +13,9 @@ window.E64 = window.E64 || {};
     'rami_egg_idle'      /* 3 minutos sin tocar nada */
   ];
 
+  /* Reset all eggs on every page load */
+  EGGS.forEach(function(egg) { localStorage.removeItem(egg); });
+
   function getUnlocked() {
     var unlocked = [];
     EGGS.forEach(function(egg) {
