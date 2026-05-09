@@ -240,6 +240,82 @@ var MAP_DATA = {
   europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
   argentina: { name:'Argentina · Dock Sud', emisiones:'Polo petroquímico crítico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerías de La Plata.' }
 };
+/* Hotspot positions as [longitude, latitude] */
+var HOTSPOT_POS = {
+  usa:       [-100,  40],
+  europe:    [  15,  50],
+  china:     [ 105,  35],
+  india:     [  78,  22],
+  argentina: [ -58, -34]
+};
+function initMap() {
+  var canvas = document.getElementById('map-canvas');
+  if (!canvas) return;
+  var wrap = canvas.parentElement;
+
+  function drawMap() {
+    var world = window.E64.WORLD_GRID;
+    if (!world) return;
+    var ROWS = world.rows, COLS = world.cols, grid = world.grid;
+
+    var cw = canvas.clientWidth || wrap.clientWidth || 800;
+    var ch = Math.round(cw * ROWS / COLS);
+    canvas.width  = cw;
+    canvas.height = ch;
+
+    var cellW = cw / COLS;
+    var cellH = ch / ROWS;
+    var ctx = canvas.getContext('2d');
+
+    /* Background */
+    ctx.fillStyle = '#07090f';
+    ctx.fillRect(0, 0, cw, ch);
+
+    /* Grid lines */
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 0.5;
+    for (var c = 0; c <= COLS; c++) {
+      ctx.beginPath();
+      ctx.moveTo(Math.round(c * cellW) + 0.5, 0);
+      ctx.lineTo(Math.round(c * cellW) + 0.5, ch);
+      ctx.stroke();
+    }
+    for (var r = 0; r <= ROWS; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, Math.round(r * cellH) + 0.5);
+      ctx.lineTo(cw, Math.round(r * cellH) + 0.5);
+      ctx.stroke();
+    }
+
+    /* Land cells */
+    var pad = cellW > 4 ? 1 : 0.5;
+    for (var row = 0; row < ROWS; row++) {
+      for (var col = 0; col < COLS; col++) {
+        if (!grid[row * COLS + col]) continue;
+        var x = col * cellW + pad;
+        var y = row * cellH + pad;
+        var w = cellW - pad * 2;
+        var h = cellH - pad * 2;
+        ctx.fillStyle = '#C9A84C';
+        ctx.fillRect(x, y, w, h);
+        /* Subtle highlight on top edge */
+        ctx.fillStyle = 'rgba(255,220,120,0.35)';
+        ctx.fillRect(x, y, w, Math.max(1, h * 0.25));
+      }
+    }
+
+    /* Update hotspot button positions */
+    document.querySelectorAll('.map-hotspot').forEach(function(btn) {
+      var region = btn.dataset.region;
+      var pos = HOTSPOT_POS[region];
+      if (!pos) return;
+      var lon = pos[0], lat = pos[1];
+      var col = (lon + 180) / 360 * COLS;
+      var row = (90 - lat) / 180 * ROWS;
+      btn.style.left = Math.round(col / COLS * cw) + 'px';
+      btn.style.top  = Math.round(row / ROWS * ch) + 'px';
+    });
+  }
 
 function buildHotspotSVG(region, x, y) {
   return [

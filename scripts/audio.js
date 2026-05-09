@@ -143,80 +143,100 @@ window.E64 = window.E64 || {};
   }
 
   /* ──────────────────────────────────────────
-     SCREAMER — terrifying multi-layered sound
+     SCREAMER — Golden Freddy MP3 + "I SEE YOU"
   ────────────────────────────────────────── */
+  var screamerAudio = null;
+  (function() {
+    try {
+      screamerAudio = new Audio('assets/audio/screamer.mp3');
+      screamerAudio.preload = 'auto';
+    } catch(e) {}
+  })();
+
+  function showISeeYou() {
+    var old = document.getElementById('e64-isee-overlay');
+    if (old) old.parentNode.removeChild(old);
+
+    var overlay = document.createElement('div');
+    overlay.id = 'e64-isee-overlay';
+    overlay.style.cssText = [
+      'position:fixed', 'inset:0', 'z-index:99999',
+      'display:flex', 'align-items:center', 'justify-content:center',
+      'pointer-events:none', 'background:rgba(0,0,0,0.0)'
+    ].join(';');
+
+    var txt = document.createElement('div');
+    txt.textContent = 'I SEE YOU';
+    txt.style.cssText = [
+      'font-family:"Special Elite",monospace',
+      'font-size:clamp(3rem,10vw,8rem)',
+      'letter-spacing:0.3em',
+      'color:#C9302C',
+      'text-shadow:0 0 40px #C9302C,0 0 80px #C9302C,0 0 120px rgba(201,48,44,0.6)',
+      'opacity:0',
+      'transition:opacity 80ms'
+    ].join(';');
+    overlay.appendChild(txt);
+    document.body.appendChild(overlay);
+
+    var flickers = 0;
+    var maxFlickers = 18;
+    function flicker() {
+      if (flickers >= maxFlickers) {
+        txt.style.opacity = '0';
+        setTimeout(function() {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }, 300);
+        return;
+      }
+      txt.style.opacity = (flickers % 2 === 0) ? '1' : '0';
+      flickers++;
+      setTimeout(flicker, 80 + Math.random() * 180);
+    }
+    requestAnimationFrame(function() { flicker(); });
+  }
+
   function playScreamer(intensity) {
-    if (!ensureCtx()) return;
     if (muted) return;
     intensity = intensity || 1;
-    var now = ctx.currentTime;
 
-    /* Layer 1 — descending sawtooth scream (the classic horror hit) */
-    var s1 = ctx.createOscillator();
-    var g1 = ctx.createGain();
-    s1.type = 'sawtooth';
-    s1.frequency.setValueAtTime(1400, now);
-    s1.frequency.exponentialRampToValueAtTime(45, now + 1.5);
-    g1.gain.setValueAtTime(0.0001, now);
-    g1.gain.exponentialRampToValueAtTime(0.5 * intensity, now + 0.05);
-    g1.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
-    s1.connect(g1); g1.connect(sfxGain);
-    s1.start(now); s1.stop(now + 1.7);
+    /* Play Golden Freddy MP3 (5s) */
+    if (screamerAudio) {
+      try {
+        screamerAudio.currentTime = 0;
+        screamerAudio.volume = Math.min(1, 0.85 * intensity);
+        screamerAudio.play().catch(function() {});
+      } catch(e) {}
+    }
 
-    /* Layer 2 — detuned square (dissonance) */
-    var s2 = ctx.createOscillator();
-    var g2 = ctx.createGain();
-    s2.type = 'square';
-    s2.frequency.setValueAtTime(220, now);
-    s2.frequency.exponentialRampToValueAtTime(60, now + 1.2);
-    s2.detune.value = 30;
-    g2.gain.setValueAtTime(0.0001, now);
-    g2.gain.exponentialRampToValueAtTime(0.18 * intensity, now + 0.08);
-    g2.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
-    s2.connect(g2); g2.connect(sfxGain);
-    s2.start(now); s2.stop(now + 1.5);
+    /* Fallback WebAudio impact layer for immediate punch */
+    if (ensureCtx()) {
+      var now = ctx.currentTime;
+      /* Sub thump */
+      var sub = ctx.createOscillator();
+      var subG = ctx.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(80, now);
+      sub.frequency.exponentialRampToValueAtTime(25, now + 0.5);
+      subG.gain.setValueAtTime(0.0001, now);
+      subG.gain.exponentialRampToValueAtTime(0.5 * intensity, now + 0.02);
+      subG.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
+      sub.connect(subG); subG.connect(sfxGain);
+      sub.start(now); sub.stop(now + 1.3);
+      /* Noise burst */
+      var bufLen = ctx.sampleRate * 0.4;
+      var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+      var noise = ctx.createBufferSource(); noise.buffer = buf;
+      var nFilt = ctx.createBiquadFilter(); nFilt.type = 'highpass'; nFilt.frequency.value = 2000;
+      var nGain = ctx.createGain(); nGain.gain.value = 0.3 * intensity;
+      noise.connect(nFilt); nFilt.connect(nGain); nGain.connect(sfxGain);
+      noise.start(now);
+    }
 
-    /* Layer 3 — white noise burst (impact) */
-    var bufLen = ctx.sampleRate * 0.6;
-    var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-    var data = buf.getChannelData(0);
-    for (var i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
-    var noise = ctx.createBufferSource();
-    noise.buffer = buf;
-    var nFilt = ctx.createBiquadFilter();
-    nFilt.type = 'highpass'; nFilt.frequency.value = 1500;
-    var nGain = ctx.createGain();
-    nGain.gain.value = 0.45 * intensity;
-    noise.connect(nFilt); nFilt.connect(nGain); nGain.connect(sfxGain);
-    noise.start(now);
-
-    /* Layer 4 — sub bass thump */
-    var sub = ctx.createOscillator();
-    var subG = ctx.createGain();
-    sub.type = 'sine';
-    sub.frequency.setValueAtTime(80, now);
-    sub.frequency.exponentialRampToValueAtTime(25, now + 0.4);
-    subG.gain.setValueAtTime(0.0001, now);
-    subG.gain.exponentialRampToValueAtTime(0.7 * intensity, now + 0.02);
-    subG.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
-    sub.connect(subG); subG.connect(sfxGain);
-    sub.start(now); sub.stop(now + 1);
-
-    /* Layer 5 — distorted "voice" (FM-modulated for unsettling timbre) */
-    var v = ctx.createOscillator();
-    var vMod = ctx.createOscillator();
-    var vModG = ctx.createGain();
-    var vG = ctx.createGain();
-    v.type = 'triangle';
-    v.frequency.value = 120;
-    vMod.frequency.value = 17;
-    vModG.gain.value = 80;
-    vMod.connect(vModG); vModG.connect(v.frequency);
-    vG.gain.setValueAtTime(0.0001, now + 0.1);
-    vG.gain.exponentialRampToValueAtTime(0.22 * intensity, now + 0.3);
-    vG.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
-    v.connect(vG); vG.connect(sfxGain);
-    vMod.start(now); v.start(now); vMod.stop(now + 1.6); v.stop(now + 1.6);
+    /* "I SEE YOU" text overlay for 5 seconds */
+    showISeeYou();
   }
 
   /* ──────────────────────────────────────────
