@@ -23,6 +23,9 @@
 </head>
 <body>
 
+  <!-- Audio toggle -->
+  <button id="audio-toggle" class="audio-toggle" aria-label="Sonido" title="Audio">🔊</button>
+
   <!-- Loading screen -->
   <div class="loader" id="loader">
     <div class="envelope">
@@ -547,6 +550,7 @@
   </div>
 
   <!-- Scripts en orden de dependencias (sin módulos ES6) -->
+  <script src="scripts/audio.js"></script>
   <script src="scripts/rami-eggs.js"></script>
   <script src="scripts/data/glossary.js"></script>
   <script src="scripts/data/timeline-events.js"></script>
