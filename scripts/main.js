@@ -240,111 +240,80 @@ var MAP_DATA = {
   europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
   argentina: { name:'Argentina · Dock Sud', emisiones:'Polo petroquímico crítico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerías de La Plata.' }
 };
-/* Hotspot positions in 0-1000 / 0-500 space */
+/* Hotspot positions as [longitude, latitude] */
 var HOTSPOT_POS = {
-  usa:       [195, 175],
-  europe:    [548, 125],
-  china:     [820, 185],
-  india:     [705, 248],
-  argentina: [295, 438]
+  usa:       [-100,  40],
+  europe:    [  15,  50],
+  china:     [ 105,  35],
+  india:     [  78,  22],
+  argentina: [ -58, -34]
 };
 function initMap() {
   var canvas = document.getElementById('map-canvas');
   if (!canvas) return;
   var wrap = canvas.parentElement;
-  var W = 1000, H = 500;
-
-  /* Build adjacency once, then triangulate (find all triangles in graph) */
-  var trianglesCache = null;
-  function computeTriangles(pts, edges) {
-    if (trianglesCache) return trianglesCache;
-    var adj = {};
-    edges.forEach(function(e) {
-      var a = e[0], b = e[1];
-      (adj[a] = adj[a] || {})[b] = 1;
-      (adj[b] = adj[b] || {})[a] = 1;
-    });
-    var tris = [];
-    edges.forEach(function(e) {
-      var a = e[0], b = e[1];
-      if (!adj[a] || !adj[b]) return;
-      Object.keys(adj[a]).forEach(function(c) {
-        c = +c;
-        if (c <= b) return;
-        if (adj[b][c]) tris.push([a, b, c]);
-      });
-    });
-    trianglesCache = tris;
-    return tris;
-  }
 
   function drawMap() {
+    var world = window.E64.WORLD_GRID;
+    if (!world) return;
+    var ROWS = world.rows, COLS = world.cols, grid = world.grid;
+
     var cw = canvas.clientWidth || wrap.clientWidth || 800;
-    var ch = Math.round(cw * H / W);
+    var ch = Math.round(cw * ROWS / COLS);
     canvas.width  = cw;
     canvas.height = ch;
-    var scaleX = cw / W, scaleY = ch / H;
+
+    var cellW = cw / COLS;
+    var cellH = ch / ROWS;
     var ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, cw, ch);
 
-    var world = window.E64.LOWPOLY_WORLD;
-    if (!world) return;
-    var pts = world.pts, edges = world.edges;
-    var tris = computeTriangles(pts, edges);
+    /* Background */
+    ctx.fillStyle = '#07090f';
+    ctx.fillRect(0, 0, cw, ch);
 
-    /* Filled triangles — gold glow */
-    for (var i = 0; i < tris.length; i++) {
-      var t = tris[i];
-      var p0 = pts[t[0]], p1 = pts[t[1]], p2 = pts[t[2]];
+    /* Grid lines */
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 0.5;
+    for (var c = 0; c <= COLS; c++) {
       ctx.beginPath();
-      ctx.moveTo(p0[0]*scaleX, p0[1]*scaleY);
-      ctx.lineTo(p1[0]*scaleX, p1[1]*scaleY);
-      ctx.lineTo(p2[0]*scaleX, p2[1]*scaleY);
-      ctx.closePath();
-      /* Slight color variation per triangle for low-poly look */
-      var v = (t[0] * 13 + t[1] * 7 + t[2] * 3) % 100;
-      var alpha = 0.05 + (v / 100) * 0.08;
-      ctx.fillStyle = 'rgba(245,197,24,' + alpha.toFixed(3) + ')';
-      ctx.fill();
+      ctx.moveTo(Math.round(c * cellW) + 0.5, 0);
+      ctx.lineTo(Math.round(c * cellW) + 0.5, ch);
+      ctx.stroke();
+    }
+    for (var r = 0; r <= ROWS; r++) {
+      ctx.beginPath();
+      ctx.moveTo(0, Math.round(r * cellH) + 0.5);
+      ctx.lineTo(cw, Math.round(r * cellH) + 0.5);
+      ctx.stroke();
     }
 
-    /* Edges — bright gold lines */
-    ctx.strokeStyle = 'rgba(245,197,24,0.55)';
-    ctx.lineWidth   = 1.0;
-    ctx.lineCap     = 'round';
-    edges.forEach(function(e) {
-      var a = pts[e[0]], b = pts[e[1]];
-      ctx.beginPath();
-      ctx.moveTo(a[0]*scaleX, a[1]*scaleY);
-      ctx.lineTo(b[0]*scaleX, b[1]*scaleY);
-      ctx.stroke();
-    });
-
-    /* Nodes — bright gold dots with halo */
-    pts.forEach(function(p) {
-      var x = p[0]*scaleX, y = p[1]*scaleY;
-      /* halo */
-      var grad = ctx.createRadialGradient(x, y, 0, x, y, 5);
-      grad.addColorStop(0, 'rgba(255,210,80,0.9)');
-      grad.addColorStop(1, 'rgba(245,197,24,0)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(x, y, 5, 0, Math.PI*2);
-      ctx.fill();
-      /* core */
-      ctx.beginPath();
-      ctx.arc(x, y, 1.6, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(255,225,140,0.95)';
-      ctx.fill();
-    });
+    /* Land cells */
+    var pad = cellW > 4 ? 1 : 0.5;
+    for (var row = 0; row < ROWS; row++) {
+      for (var col = 0; col < COLS; col++) {
+        if (!grid[row * COLS + col]) continue;
+        var x = col * cellW + pad;
+        var y = row * cellH + pad;
+        var w = cellW - pad * 2;
+        var h = cellH - pad * 2;
+        ctx.fillStyle = '#C9A84C';
+        ctx.fillRect(x, y, w, h);
+        /* Subtle highlight on top edge */
+        ctx.fillStyle = 'rgba(255,220,120,0.35)';
+        ctx.fillRect(x, y, w, Math.max(1, h * 0.25));
+      }
+    }
 
     /* Update hotspot button positions */
     document.querySelectorAll('.map-hotspot').forEach(function(btn) {
       var region = btn.dataset.region;
-      var pos    = HOTSPOT_POS[region];
+      var pos = HOTSPOT_POS[region];
       if (!pos) return;
-      btn.style.left = Math.round(pos[0] * scaleX) + 'px';
-      btn.style.top  = Math.round(pos[1] * scaleY) + 'px';
+      var lon = pos[0], lat = pos[1];
+      var col = (lon + 180) / 360 * COLS;
+      var row = (90 - lat) / 180 * ROWS;
+      btn.style.left = Math.round(col / COLS * cw) + 'px';
+      btn.style.top  = Math.round(row / ROWS * ch) + 'px';
     });
   }
 

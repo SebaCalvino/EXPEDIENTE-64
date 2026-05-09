@@ -61,7 +61,7 @@ window.E64 = window.E64 || {};
     ].join(';');
 
     el.innerHTML = '<div style="color:#888;font-size:0.7em;margin-bottom:4px">PRUEBA RECUPERADA</div>' +
-                   '<div>' + n + '/10 registros desbloqueados</div>';
+                   '<div>' + n + '/' + EGGS.length + ' registros desbloqueados</div>';
     document.body.appendChild(el);
 
     /* Glitch + unlock sound */

@@ -1,339 +1,111 @@
-window.E64 = window.E64 || {};
-
 /**
- * Low-poly constellation world map
- * Coordinates: Mercator projection, 1000×500 canvas
- *   x = (lon + 180) / 360 * 1000
- *   y = (90  - lat) / 180 * 500
- *
- * COASTLINES: arrays of [x,y] traced around continent perimeters.
- * Consecutive points in each coastline are always connected (guaranteed edges).
- * Extra interior KNN edges fill the landmass.
+ * Pixel-grid world map — 72×36 cells (5° per cell)
+ * col = floor((lon + 180) / 5)   [0–71]
+ * row = floor((90  - lat) / 5)   [0–35]
  */
-window.E64.LOWPOLY_WORLD = (function () {
+window.E64 = window.E64 || {};
+window.E64.WORLD_GRID = (function () {
+  var ROWS = 36, COLS = 72;
+  var grid = new Uint8Array(ROWS * COLS);
 
-  /* Convert lon/lat → [x,y] */
-  function p(lon, lat) {
-    return [
-      Math.round((lon + 180) / 360 * 1000),
-      Math.round((90  - lat) / 180 * 500)
-    ];
+  function fill(r0, r1, c0, c1) {
+    for (var r = Math.max(0, r0); r <= Math.min(ROWS - 1, r1); r++)
+      for (var c = Math.max(0, c0); c <= Math.min(COLS - 1, c1); c++)
+        grid[r * COLS + c] = 1;
+  }
+  function clear(r0, r1, c0, c1) {
+    for (var r = Math.max(0, r0); r <= Math.min(ROWS - 1, r1); r++)
+      for (var c = Math.max(0, c0); c <= Math.min(COLS - 1, c1); c++)
+        grid[r * COLS + c] = 0;
   }
 
-  /* ───────────────────────────────────────────
-     COASTLINE POLYLINES
-     Each array is a closed or open polyline;
-     consecutive points get a guaranteed edge.
-  ─────────────────────────────────────────── */
-  var COASTLINES = [
+  /* ─── NORTH AMERICA ─── */
+  fill(4, 6,  0,  4);   // Alaska W (Seward/Chukchi)
+  fill(3, 7,  4, 10);   // Alaska main body
+  fill(4, 8,  9, 16);   // NW Canada / Yukon
+  fill(4, 8, 16, 26);   // N Canada (NWT / Nunavut)
+  fill(8, 9,  9, 26);   // S Canada band
+  fill(9,13, 11, 23);   // USA lower 48
+  fill(9,11, 22, 26);   // E Canada (Maritime + Newfoundland)
+  fill(12,15,13, 20);   // Mexico
+  fill(15,17,17, 21);   // Central America
+  /* Hudson Bay (ocean) */
+  clear(6, 10, 18, 22);
+  /* Caribbean island chain */
+  fill(13,16, 20, 26);
 
-    /* ── NORTH AMERICA ── */
-    [
-      p(-168,66), p(-163,63), p(-152,60), p(-147,61), p(-140,59),
-      p(-135,57), p(-130,55), p(-125,49), p(-124,47), p(-124,44),
-      p(-122,37), p(-118,34), p(-117,32), p(-110,23), p(-105,20),
-      p(-90,20),  p(-88,16),  p(-85,10),  p(-83,9),
-      /* turn: Gulf Coast to East Coast */
-      p(-80,25),  p(-80,32),  p(-75,35),  p(-70,43),  p(-66,44),
-      p(-60,47),  p(-55,50),  p(-53,47),
-      /* Labrador + Hudson Bay east */
-      p(-56,52),  p(-59,55),  p(-64,60),  p(-75,65),  p(-78,68),
-      /* arctic coast westward */
-      p(-83,62),  p(-90,60),  p(-95,60),
-      p(-90,65),  p(-95,70),  p(-95,76),  p(-100,73),
-      p(-110,70), p(-120,70), p(-130,70), p(-138,68),
-      p(-148,70), p(-156,70), p(-165,68), p(-168,66)
-    ],
+  /* ─── GREENLAND ─── */
+  fill(2, 7, 26, 31);
 
-    /* Greenland */
-    [
-      p(-44,83), p(-26,82), p(-18,77), p(-22,70), p(-27,65),
-      p(-44,60), p(-52,65), p(-50,72), p(-44,83)
-    ],
+  /* ─── ICELAND ─── */
+  fill(5, 6, 32, 35);
 
-    /* ── SOUTH AMERICA ── */
-    [
-      p(-77,9),   p(-73,11),  p(-63,10),  p(-60,8),   p(-53,5),
-      p(-51,-5),  p(-36,-8),  p(-35,-12), p(-38,-15), p(-40,-20),
-      p(-43,-23), p(-48,-27), p(-51,-33), p(-57,-34), p(-58,-34),
-      p(-62,-38), p(-65,-40), p(-68,-44), p(-72,-50), p(-75,-55),
-      p(-68,-55), p(-65,-55),
-      /* Pacific side going north */
-      p(-67,-45), p(-72,-40), p(-75,-35), p(-76,-28),
-      p(-80,-18), p(-78,-10), p(-78,-5),  p(-75,0),
-      p(-76,3),   p(-77,9)
-    ],
+  /* ─── SOUTH AMERICA ─── */
+  fill(16,19, 22, 28);  // N S America (Venezuela / Guyana / Colombia)
+  fill(16,20, 21, 22);  // Pacific coast (Colombia / Ecuador)
+  fill(19,25, 22, 29);  // Brazil (main)
+  fill(22,23, 28, 30);  // E Brazil bulge
+  fill(22,29, 21, 26);  // Argentina / Chile
+  fill(19,23, 23, 26);  // Bolivia / Paraguay
 
-    /* ── EUROPE ── */
-    [
-      /* Iberian + France + NW coast */
-      p(-9,44),   p(-9,38),   p(-8,37),   p(-5,36),
-      p(0,36),    p(3,37),    p(5,37),
-      /* Mediterranean north */
-      p(5,43),    p(4,43),    p(2,43),    p(0,43),    p(-2,44),
-      p(-5,44),   p(-9,44),   p(-10,44),  p(-8,40),   p(-9,39),
-      p(-10,37),  p(-8,37),   p(-5,36),
-    ],
-    [
-      /* W Europe coast to Scandinavia */
-      p(-9,44),   p(-10,44),  p(-8,48),   p(-5,48),   p(0,51),
-      p(2,51),    p(5,52),    p(8,55),    p(10,58),   p(5,58),
-      p(0,57),    p(-7,57),   p(-8,62),   p(-14,65),  p(-25,65),
-      p(-14,65),  p(-7,62),   p(0,57),    p(5,58),    p(8,58),
-      p(10,63),   p(14,68),   p(18,70),   p(25,71),   p(28,70),
-      /* Baltic */
-      p(28,65),   p(25,58),   p(22,58),   p(18,58),   p(10,58),
-    ],
-    [
-      /* Italy */
-      p(8,44),    p(10,44),   p(14,41),   p(15,38),   p(16,38),
-      p(18,40),   p(18,43),   p(14,44),   p(12,44),   p(8,44),
-    ],
-    [
-      /* Greece / Aegean coast */
-      p(20,42),   p(22,40),   p(24,38),   p(26,40),   p(28,41),
-      p(30,38),   p(28,38),   p(26,38),   p(22,38),   p(20,38),
-      p(20,40),   p(20,42),
-    ],
+  /* ─── EUROPE ─── */
+  fill(6, 8, 34, 37);   // UK + Ireland
+  fill(9,11, 34, 37);   // Iberian Peninsula
+  fill(8,10, 37, 41);   // France / Benelux / W Germany
+  fill(7, 9, 38, 43);   // C Europe (Germany / Poland / Baltics)
+  fill(4, 7, 38, 47);   // Scandinavia
+  fill(9,12, 40, 44);   // Balkans + SE Europe
+  fill(9,11, 38, 40);   // Italy
+  fill(5, 9, 43, 48);   // E Europe / W Russia
 
-    /* ── AFRICA ── */
-    [
-      p(-5,36),   p(0,36),    p(10,37),   p(18,37),   p(25,35),
-      p(32,31),   p(33,28),   p(36,23),   p(38,20),   p(38,16),
-      p(41,11),   p(44,10),   p(46,11),   p(50,12),   p(51,12),
-      /* Horn of Africa curving south */
-      p(50,11),   p(45,11),   p(42,11),   p(40,8),    p(38,5),
-      p(35,0),    p(40,-5),   p(40,-10),
-      /* East Africa south */
-      p(38,-18),  p(35,-22),  p(32,-28),  p(28,-34),  p(18,-34),
-      p(16,-30),  p(12,-18),  p(10,-10),  p(8,-5),    p(6,4),
-      p(1,4),     p(-5,6),    p(-8,4),    p(-15,10),
-      /* West Africa north */
-      p(-17,14),  p(-17,18),  p(-15,22),  p(-10,25),  p(-5,30),
-      p(-1,33),   p(-5,36)
-    ],
-    [
-      /* Madagascar */
-      p(44,-12),  p(48,-12),  p(50,-16),  p(50,-22),
-      p(47,-25),  p(44,-24),  p(44,-20),  p(44,-16),  p(44,-12)
-    ],
+  /* ─── AFRICA ─── */
+  fill(10,15, 34, 50);  // N Africa (Sahara + Mediterranean coast)
+  fill(15,22, 34, 50);  // W + C Africa
+  fill(22,29, 38, 50);  // S Africa
+  fill(14,20, 46, 54);  // E Africa + Horn of Somalia
+  fill(20,26, 46, 50);  // Madagascar (merged with mainland at this res)
 
-    /* ── MIDDLE EAST / ARABIA ── */
-    [
-      p(32,30),   p(34,30),   p(36,32),   p(38,36),   p(42,37),
-      p(44,37),   p(47,37),   p(48,30),   p(50,25),
-      p(55,23),   p(57,20),   p(58,22),   p(56,24),   p(55,28),
-      p(50,30),   p(47,30),   p(44,32),   p(40,35),   p(36,32),
-      p(34,30),   p(32,30)
-    ],
+  /* ─── MIDDLE EAST / ARABIA ─── */
+  fill(9, 12, 44, 50);  // Levant / Iraq / Syria
+  fill(10,17, 46, 58);  // Arabia + Yemen + Oman + Iran
+  fill(9, 12, 42, 45);  // Turkey (Anatolia)
 
-    /* ── INDIA ── */
-    [
-      p(68,24),   p(70,22),   p(72,20),   p(73,16),   p(76,8),
-      p(78,8),    p(80,10),   p(80,13),   p(80,16),   p(80,18),
-      p(79,20),   p(77,20),   p(76,22),   p(74,20),   p(72,20),
-      p(70,22),   p(68,24)
-    ],
-    /* Sri Lanka */
-    [ p(80,10),  p(82,8),  p(80,6),  p(79,8),  p(80,10) ],
+  /* ─── RUSSIA ─── */
+  fill(3,  6, 44, 71);  // N Siberia (full east)
+  fill(6,  9, 44, 71);  // S Siberia + Russian Far East
+  fill(9, 12, 46, 62);  // C Asia (Kazakhstan / Uzbekistan)
 
-    /* ── MAINLAND SE ASIA ── */
-    [
-      p(98,25),   p(100,22),  p(102,20),  p(105,22),  p(108,21),
-      p(110,20),  p(110,18),  p(108,16),  p(105,12),  p(104,10),
-      p(102,4),   p(100,5),   p(100,8),   p(100,12),
-      p(98,16),   p(95,18),   p(92,22),   p(90,24),
-      p(88,26),   p(86,26),   p(82,22),   p(80,18),   p(80,20),
-      p(80,24),   p(82,28),   p(85,28),   p(88,28),   p(92,28),
-      p(96,28),   p(98,25)
-    ],
+  /* ─── SOUTH ASIA ─── */
+  fill(10,14, 56, 63);  // W China / Tibet / Xinjiang (link)
+  fill(11,16, 50, 58);  // Pakistan + India N
+  fill(14,19, 51, 59);  // India
+  fill(17,18, 54, 55);  // Sri Lanka
 
-    /* Malay Peninsula */
-    [
-      p(100,5),   p(102,4),   p(103,2),   p(104,1),   p(104,3),
-      p(102,5),   p(100,5)
-    ],
+  /* ─── EAST ASIA ─── */
+  fill(7, 14, 58, 71);  // China + Manchuria + Korea
+  fill(7, 12, 62, 66);  // Japan (Honshu + Hokkaido)
+  fill(14,17, 62, 65);  // Philippines
 
-    /* ── INDONESIA (main islands) ── */
-    /* Sumatra */
-    [
-      p(95,6),    p(100,4),   p(104,1),   p(106,-2),  p(106,-5),
-      p(104,-5),  p(102,-2),  p(100,1),   p(96,4),    p(95,6)
-    ],
-    /* Java */
-    [
-      p(106,-6),  p(108,-7),  p(110,-7),  p(112,-8),  p(115,-8),
-      p(112,-8),  p(110,-8),  p(108,-7),  p(106,-6)
-    ],
-    /* Borneo */
-    [
-      p(108,2),   p(110,4),   p(116,6),   p(118,5),   p(118,4),
-      p(117,2),   p(114,0),   p(112,-2),  p(110,-2),  p(108,0),
-      p(108,2)
-    ],
-    /* Sulawesi (simplified) */
-    [ p(120,1),  p(122,2),  p(124,0),  p(122,-2), p(120,-4), p(118,-2), p(120,1) ],
-    /* Papua New Guinea */
-    [
-      p(132,-2),  p(136,-4),  p(140,-6),  p(144,-6),  p(147,-8),
-      p(144,-8),  p(140,-8),  p(136,-6),  p(132,-4),  p(132,-2)
-    ],
+  /* ─── SE ASIA ─── */
+  fill(13,17, 56, 61);  // Indochina (Myanmar / Thailand / Vietnam)
+  fill(15,19, 58, 62);  // Malay Peninsula + S Vietnam
+  fill(17,21, 57, 62);  // Sumatra
+  fill(16,22, 60, 65);  // Borneo
+  fill(19,22, 62, 67);  // Java + Sulawesi
+  fill(19,23, 65, 70);  // Papua New Guinea + Maluku
 
-    /* Philippines */
-    [
-      p(118,18),  p(120,16),  p(122,14),  p(124,12),  p(122,10),
-      p(120,10),  p(118,12),  p(116,14),  p(118,16),  p(118,18)
-    ],
+  /* ─── AUSTRALIA ─── */
+  fill(20,28, 60, 68);  // Australia main body
+  clear(21,24, 63, 67); // Gulf of Carpentaria (ocean)
+  fill(20,22, 64, 67);  // Cape York Peninsula
+  fill(27,29, 66, 68);  // Tasmania
 
-    /* ── CHINA / KOREA / EAST ASIA coast ── */
-    [
-      p(121,32),  p(122,30),  p(122,28),  p(120,26),  p(118,24),
-      p(116,22),  p(114,22),  p(110,20),  p(110,18),
-      /* north along China coast */
-      p(110,20),  p(114,22),  p(116,22),  p(118,24),  p(121,26),
-      p(121,30),  p(122,32),  p(122,36),  p(120,40),  p(118,40),
-      p(120,36),  p(122,32),
-    ],
-    [
-      /* Korea peninsula */
-      p(126,38),  p(128,36),  p(130,34),  p(128,34),  p(126,34),
-      p(124,36),  p(126,38)
-    ],
-    [
-      /* Japan - Honshu */
-      p(130,31),  p(131,33),  p(132,34),  p(133,35),  p(135,35),
-      p(136,36),  p(137,36),  p(138,38),  p(140,40),  p(141,42),
-      p(140,44),  p(138,44),  p(135,43),  p(132,42),  p(130,38),
-      p(130,35),  p(130,31)
-    ],
-    [
-      /* Japan - Hokkaido */
-      p(140,44),  p(142,44),  p(144,44),  p(145,44),  p(144,42),
-      p(142,42),  p(140,44)
-    ],
+  /* ─── NEW ZEALAND ─── */
+  fill(25,30, 70, 71);
 
-    /* ── RUSSIA PACIFIC COAST ── */
-    [
-      p(130,50),  p(132,48),  p(133,46),  p(135,46),  p(137,46),
-      p(140,48),  p(141,50),  p(143,50),  p(145,50),  p(150,52),
-      p(152,52),  p(154,54),  p(155,56),  p(158,56),  p(160,58),
-      p(162,60),  p(165,60),  p(167,62),  p(170,63),  p(175,65),
-      p(180,68)
-    ],
+  /* ─── ANTARCTICA ─── */
+  fill(30,30,  3, 67);  // N fringe
+  fill(31,35,  0, 71);  // Full cap
 
-    /* ── RUSSIA ARCTIC COAST ── */
-    [
-      p(28,70),   p(30,68),   p(35,68),   p(40,68),   p(45,68),
-      p(50,68),   p(55,68),   p(60,68),   p(65,68),   p(70,68),
-      p(75,68),   p(80,70),   p(85,70),   p(90,72),   p(95,70),
-      p(100,70),  p(105,70),  p(110,72),  p(115,72),  p(120,72),
-      p(125,72),  p(130,70),  p(135,68),  p(140,70),  p(145,70),
-      p(150,70),  p(155,68),  p(160,65),  p(165,65),  p(170,65),
-      p(175,65),  p(180,68)
-    ],
-
-    /* ── AUSTRALIA ── */
-    [
-      p(114,-22), p(114,-28), p(116,-34), p(120,-34), p(124,-34),
-      p(129,-35), p(134,-35), p(138,-36), p(142,-38), p(146,-40),
-      p(148,-38), p(150,-36), p(152,-32), p(153,-28), p(152,-24),
-      p(148,-20), p(144,-18), p(140,-18), p(136,-12), p(131,-12),
-      p(128,-15), p(124,-18), p(122,-22), p(118,-22), p(114,-22)
-    ],
-
-    /* ── ANTARCTICA (strip) ── */
-    [
-      p(-180,-68), p(-150,-68), p(-120,-68), p(-90,-68),
-      p(-60,-68),  p(-30,-68),  p(0,-68),    p(30,-68),
-      p(60,-68),   p(90,-68),   p(120,-68),  p(150,-68),
-      p(180,-68)
-    ]
-
-  ]; /* end COASTLINES */
-
-  /* ── Interior fill points ── */
-  var INTERIOR = [
-    /* North America interior */
-    p(-95,50), p(-100,50), p(-105,50), p(-110,50), p(-115,50),
-    p(-95,45), p(-100,45), p(-105,45), p(-90,45),
-    p(-85,40), p(-90,40), p(-95,40), p(-100,40),
-    p(-85,35), p(-90,35), p(-95,35),
-    p(-80,30), p(-85,30), p(-90,30),
-    p(-75,45), p(-80,45),
-    p(-100,55), p(-105,55), p(-110,55), p(-115,55), p(-120,55),
-    p(-95,60), p(-100,60), p(-110,60), p(-120,60),
-    /* Siberia/Russia interior */
-    p(60,60), p(70,60), p(80,60), p(90,60), p(100,60), p(110,60), p(120,60), p(130,60),
-    p(60,55), p(70,55), p(80,55), p(90,55), p(100,55), p(110,55), p(120,55),
-    p(70,65), p(80,65), p(90,65), p(100,65), p(110,65), p(120,65), p(130,65),
-    p(40,55), p(50,55), p(40,60), p(50,60), p(40,65), p(50,65),
-    /* Central Asia */
-    p(60,45), p(65,45), p(70,45), p(75,45), p(80,45),
-    p(60,40), p(65,40), p(70,40), p(75,40),
-    /* China interior */
-    p(105,35), p(108,35), p(110,35), p(108,30), p(112,30),
-    p(110,28), p(108,28), p(105,28), p(105,32), p(108,32),
-    /* Europe interior */
-    p(10,50), p(15,50), p(20,50), p(25,50), p(30,50),
-    p(10,45), p(15,45), p(20,45), p(25,45),
-    p(15,55), p(20,55), p(25,55), p(30,55), p(35,55), p(40,55),
-    /* Africa interior */
-    p(10,15), p(15,15), p(20,15), p(25,15), p(30,15),
-    p(10,5),  p(15,5),  p(20,5),  p(25,5),
-    p(15,-5), p(20,-5), p(25,-5),
-    p(20,-15), p(25,-15), p(30,-15),
-    p(25,-25), p(28,-25),
-    /* South America interior */
-    p(-60,-10), p(-55,-10), p(-50,-10),
-    p(-60,-20), p(-55,-20), p(-50,-20),
-    p(-60,-30), p(-55,-30),
-    p(-65,-15), p(-65,-25),
-    p(-60,-5), p(-55,-5), p(-65,-5),
-    /* Australia interior */
-    p(125,-25), p(130,-25), p(135,-25), p(140,-25),
-    p(130,-30), p(135,-30), p(140,-30), p(145,-30),
-    p(135,-20), p(140,-20), p(145,-20),
-  ];
-
-  /* ── Flatten coastline points and build guaranteed edges ── */
-  var pts   = [];
-  var edges = [];
-
-  COASTLINES.forEach(function(line) {
-    var start = pts.length;
-    line.forEach(function(pt) { pts.push(pt); });
-    /* connect consecutive pairs */
-    for (var i = start; i < pts.length - 1; i++) {
-      edges.push([i, i + 1]);
-    }
-  });
-
-  /* Add interior points */
-  INTERIOR.forEach(function(pt) { pts.push(pt); });
-
-  /* KNN edges for interior + cross-connections */
-  var MAX_DIST2 = 1600; /* 40px max */
-  var N = pts.length;
-  for (var i = 0; i < N; i++) {
-    for (var j = i + 1; j < N; j++) {
-      var dx = pts[i][0] - pts[j][0];
-      var dy = pts[i][1] - pts[j][1];
-      var d2 = dx * dx + dy * dy;
-      if (d2 < MAX_DIST2) {
-        edges.push([i, j]);
-      }
-    }
-  }
-
-  /* Deduplicate edges */
-  var seen = {};
-  var deduped = edges.filter(function(e) {
-    var k = Math.min(e[0],e[1]) + '-' + Math.max(e[0],e[1]);
-    if (seen[k]) return false;
-    seen[k] = true;
-    return true;
-  });
-
-  return { pts: pts, edges: deduped };
-
+  return { grid: grid, rows: ROWS, cols: COLS };
 })();
