@@ -4,14 +4,13 @@ window.E64 = window.E64 || {};
   var EGGS = [
     'rami_egg_snake',    /* Comer a Rami en Sulfusnake */
     'rami_egg_konami',   /* Código Konami */
-    'rami_egg_stamp',    /* 10 clicks al sello CONFIDENCIAL */
+    'rami_egg_stamp',    /* 10 clicks en la bibliografía de Chang */
     'rami_egg_timeline', /* 7 clicks en "1991" en la timeline */
     'rami_egg_quiz',     /* Sacar 0/10 en el quiz */
     'rami_egg_map',      /* 5 clicks sobre Dock Sud */
     'rami_egg_lewis',    /* Resolver Lewis en menos de 15s */
     'rami_egg_console',  /* Escribir "rami" en consola */
-    'rami_egg_idle',     /* 3 minutos sin tocar nada */
-    'rami_egg_voting'    /* Votar CULPABLE 6 veces seguidas */
+    'rami_egg_idle'      /* 3 minutos sin tocar nada */
   ];
 
   function getUnlocked() {
@@ -36,7 +35,7 @@ window.E64 = window.E64 || {};
     var n = countUnlocked();
     showEggNotification(n);
     updateRamiCard(n);
-    if (n >= 10) revealRamiCard();
+    if (n >= 9) revealRamiCard();
   }
 
   function showEggNotification(n) {
@@ -98,21 +97,21 @@ window.E64 = window.E64 || {};
   function updateRamiCard(n) {
     var overlay = document.getElementById('rami-card-overlay');
     if (!overlay) return;
-    var degrees = Math.min(n * 36, 360);
-    /* Use conic-gradient to reveal progressively */
-    if (degrees >= 360) {
-      overlay.style.opacity = '0';
-    } else {
-      overlay.style.background = 'conic-gradient(transparent ' + degrees + 'deg, rgba(0,0,0,0.95) ' + degrees + 'deg)';
-    }
+    /* Keep the photo fully hidden until all eggs are unlocked */
+    overlay.style.background = '#000';
+    overlay.style.opacity = '1';
     /* Update "?" count indicator */
     var indicator = document.getElementById('rami-egg-count');
-    if (indicator) indicator.textContent = n + '/10';
+    if (indicator) indicator.textContent = n + '/9';
   }
 
   function revealRamiCard() {
     var card = document.querySelector('.agent-card[data-agent="rami"]');
     if (!card) return;
+
+    /* Hide the censor overlay */
+    var overlay = document.getElementById('rami-card-overlay');
+    if (overlay) overlay.style.display = 'none';
 
     /* Deciphering animation on censored lines */
     card.classList.add('rami-revealed');
@@ -157,13 +156,13 @@ window.E64 = window.E64 || {};
     setTimeout(function() {
       var n = countUnlocked();
       updateRamiCard(n);
-      if (n >= 10) revealRamiCard();
+      if (n >= 9) revealRamiCard();
     }, 500);
   });
 
-  /* ── Idle egg: 3 min without interaction ── */
+  /* ── Idle egg: 2 min without interaction ── */
   var idleTimer = null;
-  var IDLE_MS = 180000;
+  var IDLE_MS = 120000;
   function resetIdle() {
     if (idleTimer) clearTimeout(idleTimer);
     idleTimer = setTimeout(function() {
@@ -171,7 +170,6 @@ window.E64 = window.E64 || {};
     }, IDLE_MS);
   }
   function triggerIdleEgg() {
-    if (isUnlocked('rami_egg_idle')) return;
     /* Flash */
     var flash = document.createElement('div');
     flash.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:0;background:#000;transition:opacity 100ms;';
@@ -181,7 +179,7 @@ window.E64 = window.E64 || {};
       /* Show Rami for 0.2s */
       if (document.querySelector('img[src*="ramapita"]') || true) {
         var img = document.createElement('img');
-        img.src = 'assets/img/ramapita1.png';
+        img.src = 'assets/img/sebastiancalvino.png';
         img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99998;pointer-events:none;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);';
         document.body.appendChild(img);
         setTimeout(function() {
@@ -196,7 +194,7 @@ window.E64 = window.E64 || {};
     unlockEgg('rami_egg_idle');
     resetIdle();
   }
-  ['mousemove','click','keydown','scroll','touchstart'].forEach(function(ev) {
+  ['click','keydown'].forEach(function(ev) {
     document.addEventListener(ev, resetIdle, { passive: true });
   });
   resetIdle();
@@ -204,7 +202,7 @@ window.E64 = window.E64 || {};
   /* ── Console egg: type "rami" globally ── */
   var consoleBuffer = '';
   document.addEventListener('keydown', function(e) {
-    if (document.activeElement && document.activeElement.tagName.match(/INPUT|TEXTAREA|SELECT/)) return;
+    // Removed check for active input to allow typing "rami" anywhere
     if (e.key && e.key.length === 1) {
       consoleBuffer += e.key.toLowerCase();
       if (consoleBuffer.length > 10) consoleBuffer = consoleBuffer.slice(-10);

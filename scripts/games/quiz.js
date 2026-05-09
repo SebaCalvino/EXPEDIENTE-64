@@ -26,10 +26,9 @@ window.E64.buildQuiz = function(container) {
     /* Easter egg: 0/10 → Rami message */
     if (correct === 0 && window.E64.unlockEgg) {
       window.E64.unlockEgg('rami_egg_quiz');
-      body.innerHTML = '<div class="quiz-result" style="background:#000;color:#C9302C;padding:40px;font-family:\'Special Elite\',serif;">' +
-        '<p style="font-size:1.5rem;letter-spacing:0.2em;margin-bottom:20px">0 / 10</p>' +
-        '<p style="font-size:1rem;line-height:1.8;color:#ff4444;margin-bottom:24px">Respondiste todo mal a propósito.<br>Él te lo agradece.</p>' +
-        '<img src="assets/img/ramapita1.png" style="width:160px;height:160px;object-fit:cover;border-radius:50%;filter:contrast(1.4) saturate(0.3);border:2px solid #C9302C;margin-bottom:20px;">' +
+      body.innerHTML = '<div class="quiz-result" style="background:#000;color:#C9302C;padding:40px;font-family:\'Special Elite\',serif;display:flex;flex-direction:column;align-items:center;text-align:center;">' +
+        '<p style="font-size:3.5rem;letter-spacing:0.2em;margin-bottom:30px;line-height:1;">I SEE YOU</p>' +
+        '<img src="assets/img/sebastiancalvino.png" style="width:220px;height:220px;object-fit:cover;border-radius:50%;filter:contrast(1.4) saturate(0.3);border:2px solid #C9302C;margin-bottom:30px;">' +
         '<div class="puzzle-actions"><button class="btn" id="quiz-retry">↺ Reintentar</button></div></div>';
       body.querySelector('#quiz-retry').onclick = function() { current=0; correct=0; renderQuestion(); };
       return;

@@ -1106,12 +1106,11 @@
 .rami-censor-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.95);
+  background: #000;
   z-index: 4;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.5s;
 }
 .rami-question-marks {
   font-family: var(--font-display);
@@ -1124,7 +1123,7 @@
 
 /* Hover: brief glitch showing real photo */
 .agent-card--rami:hover .rami-censor-overlay {
-  animation: ramiGlitch 0.15s steps(1) infinite;
+  /* Removed glitch for more mystery */
 }
 @keyframes ramiGlitch {
   0%   { opacity: 1; }

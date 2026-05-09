@@ -4,10 +4,10 @@
   /* ── Access check ── */
   var eggsUnlocked = 0;
   var EGGS = ['rami_egg_snake','rami_egg_konami','rami_egg_stamp','rami_egg_timeline',
-    'rami_egg_quiz','rami_egg_map','rami_egg_lewis','rami_egg_console','rami_egg_idle','rami_egg_voting'];
+    'rami_egg_quiz','rami_egg_map','rami_egg_lewis','rami_egg_console','rami_egg_idle'];
   EGGS.forEach(function(e) { if (localStorage.getItem(e) === 'true') eggsUnlocked++; });
 
-  if (eggsUnlocked < 10) {
+  if (eggsUnlocked < 9) {
     showAccessDenied();
     return;
   }
@@ -121,7 +121,7 @@
     scheduleNext();
   }
 
-  var ramiPhotos = ['assets/img/ramapita1.png','assets/img/ramapita2.png','assets/img/ramapita3.png'];
+  var ramiPhotos = ['assets/img/sebastiancalvino.png','assets/img/ramapita2.png','assets/img/ramapita3.png'];
   function triggerSubliminale() {
     var flash = document.getElementById('subliminal-flash');
     if (!flash) return;
