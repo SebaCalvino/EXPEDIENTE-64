@@ -113,8 +113,12 @@ window.E64.buildSulfusnake = function(container) {
     /* 1. Unlock easter egg */
     if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake');
 
-    /* 2. Screamer audio */
-    playScreamer();
+    /* 2. Screamer audio — usa el sistema central si está disponible */
+    if (window.E64.audio && window.E64.audio.playScreamer) {
+      window.E64.audio.playScreamer(1.2);
+    } else {
+      playScreamer();
+    }
 
     /* 3. Black overlay */
     var overlay2 = document.createElement('div');

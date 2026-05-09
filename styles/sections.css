@@ -621,12 +621,26 @@
 }
 .map-wrap {
   position: relative;
-  background: radial-gradient(ellipse at 50% 50%, #1a2535 0%, #0a0e14 100%);
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(45,60,95,0.6) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 60%, rgba(30,45,75,0.5) 0%, transparent 55%),
+    linear-gradient(135deg, #0d1424 0%, #0a1020 50%, #060a18 100%);
   border-radius: 8px;
-  border: 1px solid rgba(245,197,24,0.2);
-  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(245,197,24,0.25);
+  box-shadow: var(--shadow-card), inset 0 0 80px rgba(0,0,0,0.6);
   overflow: hidden;
   padding: 0;
+}
+.map-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(255,255,255,0.05) 0px, transparent 1px),
+    radial-gradient(circle at 75% 70%, rgba(255,255,255,0.04) 0px, transparent 1px),
+    radial-gradient(circle at 50% 80%, rgba(255,255,255,0.03) 0px, transparent 1px);
+  background-size: 100px 100px, 70px 70px, 140px 140px;
+  pointer-events: none;
+  opacity: 0.6;
 }
 .world-map-canvas {
   width: 100%;

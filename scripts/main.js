@@ -23,8 +23,72 @@ window.addEventListener('DOMContentLoaded', function() {
   initClosing();
   initGames();
   initEasterEggs();
+  initAudioToggle();
+  initOpenFileButton();
+  initUIClickSounds();
   if (window.lucide) window.lucide.createIcons();
 });
+
+/* ---- Global UI click sounds ---- */
+function initUIClickSounds() {
+  document.addEventListener('click', function(e) {
+    if (!window.E64.audio) return;
+    var t = e.target;
+    if (t.closest('.btn, .tab-btn, .map-hotspot, .nav-links a, .audio-toggle, .vote-btn')) {
+      window.E64.audio.playClick();
+    }
+  }, true);
+}
+
+/* ---- Audio mute toggle ---- */
+function initAudioToggle() {
+  var btn = document.getElementById('audio-toggle');
+  if (!btn) return;
+  /* Restore prior state */
+  var saved = localStorage.getItem('e64_muted') === '1';
+  if (saved && window.E64.audio) window.E64.audio.setMuted(true);
+  if (saved) { btn.classList.add('muted'); btn.textContent = '🔇'; }
+  btn.addEventListener('click', function() {
+    if (!window.E64.audio) return;
+    var nowMuted = window.E64.audio.toggleMuted();
+    btn.classList.toggle('muted', nowMuted);
+    btn.textContent = nowMuted ? '🔇' : '🔊';
+    localStorage.setItem('e64_muted', nowMuted ? '1' : '0');
+  });
+}
+
+/* ---- "ABRIR EXPEDIENTE" button — stamp slam transition ---- */
+function initOpenFileButton() {
+  var btn = document.querySelector('.hero-cta .btn');
+  if (!btn) return;
+  /* Build overlay nodes once */
+  var flash = document.createElement('div');
+  flash.className = 'open-file-flash';
+  document.body.appendChild(flash);
+  var stamp = document.createElement('div');
+  stamp.className = 'open-file-stamp';
+  stamp.innerHTML = '<div class="stamp">EXPEDIENTE ABIERTO</div>';
+  document.body.appendChild(stamp);
+
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    var target = document.querySelector(btn.getAttribute('href') || '#sospechosa');
+    btn.classList.remove('btn-pressed');
+    void btn.offsetWidth;
+    btn.classList.add('btn-pressed');
+    if (window.E64.audio) {
+      window.E64.audio.playStamp();
+      setTimeout(function() { window.E64.audio.playPaper(); }, 180);
+    }
+    flash.classList.add('active');
+    setTimeout(function() { flash.classList.remove('active'); }, 180);
+    stamp.classList.remove('active'); void stamp.offsetWidth; stamp.classList.add('active');
+    setTimeout(function() {
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 280);
+    setTimeout(function() { stamp.classList.remove('active'); }, 900);
+  });
+}
 
 /* ---- Navigation ---- */
 function initNavigation() {
@@ -190,6 +254,30 @@ function initMap() {
   var wrap = canvas.parentElement;
   var W = 1000, H = 500;
 
+  /* Build adjacency once, then triangulate (find all triangles in graph) */
+  var trianglesCache = null;
+  function computeTriangles(pts, edges) {
+    if (trianglesCache) return trianglesCache;
+    var adj = {};
+    edges.forEach(function(e) {
+      var a = e[0], b = e[1];
+      (adj[a] = adj[a] || {})[b] = 1;
+      (adj[b] = adj[b] || {})[a] = 1;
+    });
+    var tris = [];
+    edges.forEach(function(e) {
+      var a = e[0], b = e[1];
+      if (!adj[a] || !adj[b]) return;
+      Object.keys(adj[a]).forEach(function(c) {
+        c = +c;
+        if (c <= b) return;
+        if (adj[b][c]) tris.push([a, b, c]);
+      });
+    });
+    trianglesCache = tris;
+    return tris;
+  }
+
   function drawMap() {
     var cw = canvas.clientWidth || wrap.clientWidth || 800;
     var ch = Math.round(cw * H / W);
@@ -202,10 +290,28 @@ function initMap() {
     var world = window.E64.LOWPOLY_WORLD;
     if (!world) return;
     var pts = world.pts, edges = world.edges;
+    var tris = computeTriangles(pts, edges);
 
-    /* Edges */
-    ctx.strokeStyle = 'rgba(245,197,24,0.28)';
-    ctx.lineWidth   = 0.8;
+    /* Filled triangles — gold glow */
+    for (var i = 0; i < tris.length; i++) {
+      var t = tris[i];
+      var p0 = pts[t[0]], p1 = pts[t[1]], p2 = pts[t[2]];
+      ctx.beginPath();
+      ctx.moveTo(p0[0]*scaleX, p0[1]*scaleY);
+      ctx.lineTo(p1[0]*scaleX, p1[1]*scaleY);
+      ctx.lineTo(p2[0]*scaleX, p2[1]*scaleY);
+      ctx.closePath();
+      /* Slight color variation per triangle for low-poly look */
+      var v = (t[0] * 13 + t[1] * 7 + t[2] * 3) % 100;
+      var alpha = 0.05 + (v / 100) * 0.08;
+      ctx.fillStyle = 'rgba(245,197,24,' + alpha.toFixed(3) + ')';
+      ctx.fill();
+    }
+
+    /* Edges — bright gold lines */
+    ctx.strokeStyle = 'rgba(245,197,24,0.55)';
+    ctx.lineWidth   = 1.0;
+    ctx.lineCap     = 'round';
     edges.forEach(function(e) {
       var a = pts[e[0]], b = pts[e[1]];
       ctx.beginPath();
@@ -213,11 +319,22 @@ function initMap() {
       ctx.lineTo(b[0]*scaleX, b[1]*scaleY);
       ctx.stroke();
     });
-    /* Nodes */
+
+    /* Nodes — bright gold dots with halo */
     pts.forEach(function(p) {
+      var x = p[0]*scaleX, y = p[1]*scaleY;
+      /* halo */
+      var grad = ctx.createRadialGradient(x, y, 0, x, y, 5);
+      grad.addColorStop(0, 'rgba(255,210,80,0.9)');
+      grad.addColorStop(1, 'rgba(245,197,24,0)');
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(p[0]*scaleX, p[1]*scaleY, 1.8, 0, Math.PI*2);
-      ctx.fillStyle = 'rgba(245,197,24,0.55)';
+      ctx.arc(x, y, 5, 0, Math.PI*2);
+      ctx.fill();
+      /* core */
+      ctx.beginPath();
+      ctx.arc(x, y, 1.6, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(255,225,140,0.95)';
       ctx.fill();
     });
 
@@ -427,6 +544,7 @@ function showRamiKonami() {
   txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:0.2em;text-align:center;animation:shake 0.3s infinite;';
   overlay.appendChild(txt);
   document.body.appendChild(overlay);
+  if (window.E64.audio) window.E64.audio.playRumble();
 
   /* Subliminal Rami at 2s */
   setTimeout(function() {
@@ -435,6 +553,7 @@ function showRamiKonami() {
     img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
     overlay.appendChild(img);
     requestAnimationFrame(function() { img.style.opacity = '1'; });
+    if (window.E64.audio) window.E64.audio.playScreamer(0.9);
     setTimeout(function() { img.style.opacity = '0'; }, 300);
   }, 1800);
 
@@ -487,6 +606,7 @@ function triggerTimeline1991Egg(polaroid) {
   var orig = imgEl.innerHTML;
   /* Replace with Rami image briefly */
   imgEl.innerHTML = '<img src="assets/img/ramapita2.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.2) saturate(0.2) blur(1px) sepia(0.4);">';
+  if (window.E64.audio) window.E64.audio.playGlitch();
   var caption = polaroid.querySelector('.polaroid-title');
   var origTitle = caption ? caption.textContent : '';
   if (caption) caption.textContent = '23/10/1991 — Dock Sud, no Pinatubo.';
@@ -497,3 +617,15 @@ function triggerTimeline1991Egg(polaroid) {
 }
 
 
+function triggerVotingEgg() {
+  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_voting');
+  var msg = document.createElement('div');
+  msg.style.cssText = 'position:fixed;inset:0;z-index:99989;background:#000;display:flex;align-items:center;justify-content:center;';
+  var txt = document.createElement('p');
+  txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(1rem,3vw,1.8rem);text-align:center;max-width:600px;padding:40px;line-height:1.6;';
+  txt.textContent = 'Vos también lo querés muerto. Como ellos.';
+  msg.appendChild(txt);
+  document.body.appendChild(msg);
+  if (window.E64.audio) window.E64.audio.playScreamer(0.7);
+  setTimeout(function() { if (msg.parentNode) msg.parentNode.removeChild(msg); }, 2500);
+}

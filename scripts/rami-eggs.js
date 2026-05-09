@@ -66,8 +66,13 @@ window.E64 = window.E64 || {};
                    '<div>' + n + '/10 registros desbloqueados</div>';
     document.body.appendChild(el);
 
-    /* Glitch sound */
-    playGlitch();
+    /* Glitch + unlock sound */
+    if (window.E64.audio) {
+      window.E64.audio.playGlitch();
+      setTimeout(function() { window.E64.audio.playUnlock(); }, 80);
+    } else {
+      playGlitch();
+    }
 
     requestAnimationFrame(function() {
       requestAnimationFrame(function() { el.style.opacity = '1'; });
@@ -174,6 +179,9 @@ window.E64 = window.E64 || {};
     var flash = document.createElement('div');
     flash.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:0;background:#000;transition:opacity 100ms;';
     document.body.appendChild(flash);
+    if (window.E64.audio && window.E64.audio.playScreamer) {
+      window.E64.audio.playScreamer(0.4);
+    }
     requestAnimationFrame(function() { flash.style.opacity = '1'; });
     setTimeout(function() {
       /* Show Rami for 0.2s */
