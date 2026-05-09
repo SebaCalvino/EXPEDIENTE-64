@@ -647,6 +647,20 @@
   height: auto;
   display: block;
 }
+.world-map-svg-wrap {
+  width: 100%;
+  position: relative;
+}
+.world-map-svg-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.map-hotspot-svg {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.map-hotspot-svg:hover { opacity: 0.85; }
 /* Hotspot buttons floating over the canvas */
 .map-hotspot {
   position: absolute;
