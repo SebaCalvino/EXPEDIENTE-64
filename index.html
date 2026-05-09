@@ -363,13 +363,9 @@
         <p class="section-lead">Hotspots globales de SO₂. Clic en cada punto para abrir el legajo regional.</p>
 
         <div class="map-wrap reveal">
-          <canvas id="map-canvas" class="world-map-canvas" aria-label="Mapa mundial de emisiones de SO2"></canvas>
-          <!-- Hotspot buttons (positioned absolutely over canvas via JS) -->
-          <button class="map-hotspot" data-region="usa"       aria-label="Hotspot EE.UU."></button>
-          <button class="map-hotspot" data-region="europe"    aria-label="Hotspot Europa"></button>
-          <button class="map-hotspot" data-region="china"     aria-label="Hotspot China"></button>
-          <button class="map-hotspot" data-region="india"     aria-label="Hotspot India"></button>
-          <button class="map-hotspot" data-region="argentina" aria-label="Hotspot Argentina · Dock Sud" data-dock-sud></button>
+          <div class="world-map-svg-wrap" id="world-map-svg-wrap">
+            <!-- SVG world map rendered by JS -->
+          </div>
           <div class="map-legend">
             <span class="map-legend-dot"></span>
             <span>Foco de emisión activo · clic para detalle</span>
@@ -433,6 +429,13 @@
             <h3>¿Cuánto sabés del SO₂?</h3>
             <p>10 preguntas, 15 segundos cada una. Llegá al rango de Jefe del Expediente 64.</p>
             <span class="play">JUGAR ▸</span>
+          </article>
+
+          <article class="game-card" data-game="escape" tabindex="0" style="border-color:#C9302C;box-shadow:6px 6px 0 #8B0000;">
+            <div class="game-num" style="color:#C9302C">JUEGO 06 · SECRETO</div>
+            <h3 style="color:#C9302C">Escapar de Rami</h3>
+            <p>Estás en la refinería. Rami te persigue. Encontrá la salida antes de que te atrape. No mires atrás.</p>
+            <span class="play" style="background:#C9302C;color:#fff">JUGAR ▸</span>
           </article>
         </div>
       </div>
@@ -577,6 +580,7 @@
   <script src="scripts/games/memotest.js"></script>
   <script src="scripts/games/quiz.js"></script>
   <script src="scripts/games/lewis-builder.js"></script>
+  <script src="scripts/games/escape-rami.js"></script>
   <script src="scripts/main.js"></script>
 </body>
 </html>

@@ -61,6 +61,7 @@ window.E64.buildSulfusnake = function(container) {
     snake = [{x:10,y:10},{x:9,y:10},{x:8,y:10}];
     dir = {x:1,y:0}; nextDir = {x:1,y:0};
     score = 0; oxygenStreak = 0; mols = 0; alive = true;
+    if (waterTrapTimer) { clearTimeout(waterTrapTimer); waterTrapTimer = null; }
     spawnFood();
     overlay.classList.remove('show');
     overlay.style.background = '';
@@ -68,6 +69,9 @@ window.E64.buildSulfusnake = function(container) {
     msgEl.style.color = '';
     updateHud();
   }
+
+  /* Timer for water trap — shows for 5s then replaces with oxygen */
+  var waterTrapTimer = null;
 
   function spawnFood() {
     var r = Math.random();
@@ -88,7 +92,21 @@ window.E64.buildSulfusnake = function(container) {
       y = Math.floor(Math.random()*SIZE);
       ok = !snake.some(function(s){return s.x===x&&s.y===y;});
     } while(!ok);
-    food = {x:x, y:y, type:type};
+    food = {x:x, y:y, type:type, _spawnTime: Date.now()};
+
+    /* If water trap: show for 5s then replace with oxygen */
+    if (type === 'water') {
+      if (waterTrapTimer) clearTimeout(waterTrapTimer);
+      waterTrapTimer = setTimeout(function() {
+        if (food && food.type === 'water') {
+          food.type = 'oxygen';
+          /* Flash warning */
+          food._replacing = true;
+          setTimeout(function() { if (food) food._replacing = false; }, 400);
+        }
+        waterTrapTimer = null;
+      }, 5000);
+    }
   }
 
   function updateHud() { scoreEl.textContent=score; molEl.textContent=mols; }
@@ -113,12 +131,12 @@ window.E64.buildSulfusnake = function(container) {
     /* 1. Unlock easter egg */
     if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake');
 
-    /* 2. Screamer audio — usa el sistema central si está disponible */
+    /* 2. Screamer audio — usa el sistema central si está disponible, con grito humano terrorífico */
     if (window.E64.audio && window.E64.audio.playScreamer) {
       window.E64.audio.playScreamer(1.2);
-    } else {
-      playScreamer();
     }
+    /* Siempre reproducir el grito humano sintetizado adicional */
+    playHumanScream();
 
     /* 3. Black overlay */
     var overlay2 = document.createElement('div');
@@ -160,6 +178,68 @@ window.E64.buildSulfusnake = function(container) {
         );
       }, 300);
     }, 1200);
+  }
+
+  /* Grito humano terrorífico sintetizado */
+  function playHumanScream() {
+    var ctx2 = getAudio();
+    if (!ctx2) return;
+    try {
+      var now = ctx2.currentTime;
+
+      /* Capa 1: grito agudo con vibrato (simula voz humana aterrorizada) */
+      var v1 = ctx2.createOscillator();
+      var v1g = ctx2.createGain();
+      v1.type = 'sawtooth';
+      v1.frequency.setValueAtTime(600, now);
+      v1.frequency.exponentialRampToValueAtTime(900, now + 0.1);
+      v1.frequency.exponentialRampToValueAtTime(500, now + 0.4);
+      v1.frequency.exponentialRampToValueAtTime(750, now + 0.7);
+      v1.frequency.exponentialRampToValueAtTime(300, now + 1.2);
+      /* Vibrato */
+      var vibLfo = ctx2.createOscillator();
+      var vibG = ctx2.createGain();
+      vibLfo.frequency.value = 8;
+      vibG.gain.value = 30;
+      vibLfo.connect(vibG); vibG.connect(v1.frequency);
+      vibLfo.start(now); vibLfo.stop(now + 1.3);
+      /* Formant filter (boca abierta) */
+      var f1 = ctx2.createBiquadFilter();
+      f1.type = 'bandpass'; f1.frequency.value = 800; f1.Q.value = 3;
+      v1g.gain.setValueAtTime(0.0001, now);
+      v1g.gain.exponentialRampToValueAtTime(0.6, now + 0.05);
+      v1g.gain.exponentialRampToValueAtTime(0.4, now + 0.8);
+      v1g.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
+      v1.connect(f1); f1.connect(v1g); v1g.connect(ctx2.destination);
+      v1.start(now); v1.stop(now + 1.4);
+
+      /* Capa 2: ruido de garganta (consonantes del grito) */
+      var bufLen = ctx2.sampleRate * 1.0;
+      var buf = ctx2.createBuffer(1, bufLen, ctx2.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < bufLen; i++) {
+        var env = i < bufLen * 0.05 ? i / (bufLen * 0.05) : Math.exp(-3 * (i / bufLen - 0.05));
+        data[i] = (Math.random() * 2 - 1) * env * 0.5;
+      }
+      var ns = ctx2.createBufferSource(); ns.buffer = buf;
+      var nf = ctx2.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2000; nf.Q.value = 2;
+      var ng = ctx2.createGain(); ng.gain.value = 0.35;
+      ns.connect(nf); nf.connect(ng); ng.connect(ctx2.destination);
+      ns.start(now);
+
+      /* Capa 3: sub-golpe de impacto */
+      var sub = ctx2.createOscillator();
+      var subG = ctx2.createGain();
+      sub.type = 'sine';
+      sub.frequency.setValueAtTime(120, now);
+      sub.frequency.exponentialRampToValueAtTime(30, now + 0.3);
+      subG.gain.setValueAtTime(0.0001, now);
+      subG.gain.exponentialRampToValueAtTime(0.8, now + 0.01);
+      subG.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+      sub.connect(subG); subG.connect(ctx2.destination);
+      sub.start(now); sub.stop(now + 0.6);
+
+    } catch(e) {}
   }
 
   function playScreamer() {
@@ -259,16 +339,41 @@ window.E64.buildSulfusnake = function(container) {
         ctx.stroke();
         ctx.restore();
       } else {
-        var col = food.type==='oxygen' ? '#C9302C' : food.type==='water' ? '#3B82F6' : food.type==='vanadium' ? '#84CC16' : '#C9302C';
-        var lbl = food.type==='oxygen' ? 'O' : food.type==='water' ? 'H₂O' : food.type==='vanadium' ? '★' : '?';
-        ctx.fillStyle = col;
-        ctx.shadowColor = col; ctx.shadowBlur = 10;
-        ctx.beginPath(); ctx.arc(fx,fy,CELL/2-2,0,Math.PI*2); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 12px JetBrains Mono';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(lbl, fx, fy);
+        /* Water: show countdown ring */
+        if (food.type === 'water') {
+          var waterCol = food._replacing ? '#84CC16' : '#3B82F6';
+          var waterLbl = food._replacing ? 'O' : 'H₂O';
+          ctx.fillStyle = waterCol;
+          ctx.shadowColor = waterCol; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(fx,fy,CELL/2-2,0,Math.PI*2); ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 10px JetBrains Mono';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(waterLbl, fx, fy);
+          /* Countdown arc (white arc shrinks as time passes) */
+          if (waterTrapTimer && food._spawnTime) {
+            var prog = Math.min(1, (Date.now() - food._spawnTime) / 5000);
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(fx, fy, CELL/2+4, -Math.PI/2, -Math.PI/2 + (1 - prog) * Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+        } else {
+          var col = food.type==='oxygen' ? '#C9302C' : food.type==='vanadium' ? '#84CC16' : '#C9302C';
+          var lbl = food.type==='oxygen' ? 'O' : food.type==='vanadium' ? '★' : '?';
+          ctx.fillStyle = col;
+          ctx.shadowColor = col; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(fx,fy,CELL/2-2,0,Math.PI*2); ctx.fill();
+          ctx.shadowBlur = 0;
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 12px JetBrains Mono';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(lbl, fx, fy);
+        }
       }
     }
 
@@ -325,6 +430,7 @@ window.E64.buildSulfusnake = function(container) {
 
   container._cleanup = function() {
     clearInterval(interval);
+    if (waterTrapTimer) clearTimeout(waterTrapTimer);
     document.removeEventListener('keydown', onKey);
   };
 };

@@ -232,7 +232,7 @@ function initVideos() {
   });
 }
 
-/* ---- Map constellation renderer ---- */
+/* ---- Map SVG renderer ---- */
 var MAP_DATA = {
   china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO₂ urbano.' },
   india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbón. La OMS estima 1,7M muertes prematuras anuales.' },
@@ -317,14 +317,82 @@ function initMap() {
     });
   }
 
-  drawMap();
-  window.addEventListener('resize', drawMap, { passive: true });
+function buildHotspotSVG(region, x, y) {
+  return [
+    '<g data-region="' + region + '" class="map-hotspot-svg" style="cursor:pointer">',
+    '  <circle cx="' + x + '" cy="' + y + '" r="18" fill="url(#hotspot-grad)" opacity="0.5">',
+    '    <animate attributeName="r" values="14;22;14" dur="2s" repeatCount="indefinite"/>',
+    '    <animate attributeName="opacity" values="0.5;0.15;0.5" dur="2s" repeatCount="indefinite"/>',
+    '  </circle>',
+    '  <circle cx="' + x + '" cy="' + y + '" r="6" fill="#C9302C" stroke="#ff6666" stroke-width="1.5"/>',
+    '  <circle cx="' + x + '" cy="' + y + '" r="3" fill="#fff"/>',
+    '</g>'
+  ].join('\n');
+}
 
-  /* Hotspot clicks */
+function initMap() {
+  var wrap = document.getElementById('world-map-svg-wrap');
+  if (!wrap) return;
+
+  var svgParts = [
+    '<svg id="world-map-svg" viewBox="0 0 1000 507" xmlns="http://www.w3.org/2000/svg"',
+    '  style="width:100%;height:auto;display:block;background:#0a0e14;border:1px solid rgba(245,197,24,0.15);">',
+    '  <defs>',
+    '    <filter id="map-glow">',
+    '      <feGaussianBlur stdDeviation="1.5" result="blur"/>',
+    '      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>',
+    '    </filter>',
+    '    <radialGradient id="hotspot-grad" cx="50%" cy="50%" r="50%">',
+    '      <stop offset="0%" stop-color="#C9302C" stop-opacity="0.9"/>',
+    '      <stop offset="100%" stop-color="#C9302C" stop-opacity="0"/>',
+    '    </radialGradient>',
+    '  </defs>',
+    '  <rect width="1000" height="507" fill="#0a0e14"/>',
+    '  <g stroke="rgba(245,197,24,0.06)" stroke-width="0.5">',
+    '    <line x1="0" y1="126" x2="1000" y2="126"/>',
+    '    <line x1="0" y1="253" x2="1000" y2="253"/>',
+    '    <line x1="0" y1="380" x2="1000" y2="380"/>',
+    '    <line x1="250" y1="0" x2="250" y2="507"/>',
+    '    <line x1="500" y1="0" x2="500" y2="507"/>',
+    '    <line x1="750" y1="0" x2="750" y2="507"/>',
+    '  </g>',
+    '  <g fill="rgba(245,197,24,0.22)" stroke="rgba(245,197,24,0.65)" stroke-width="0.8" filter="url(#map-glow)">',
+    '    <path d="M155,55 L170,50 L195,55 L215,60 L230,70 L240,85 L245,100 L240,115 L230,125 L220,135 L210,145 L205,160 L200,175 L195,185 L185,195 L175,200 L165,205 L155,210 L145,215 L135,220 L125,225 L115,230 L105,235 L100,245 L95,255 L90,265 L85,270 L80,265 L75,255 L70,245 L65,235 L60,225 L55,215 L50,205 L45,195 L40,185 L38,175 L40,165 L45,155 L50,145 L55,135 L60,125 L65,115 L70,105 L75,95 L80,85 L85,75 L90,65 L95,58 L105,52 L120,50 L135,52 Z"/>',
+    '    <path d="M310,30 L330,25 L350,28 L360,38 L355,50 L340,58 L320,60 L305,55 L300,45 Z"/>',
+    '    <path d="M155,210 L160,220 L165,230 L162,240 L155,245 L148,240 L145,230 L148,220 Z"/>',
+    '    <path d="M200,245 L215,240 L230,245 L245,255 L255,270 L260,285 L258,300 L252,315 L245,330 L238,345 L230,360 L220,375 L210,385 L200,390 L190,385 L180,375 L172,360 L168,345 L165,330 L163,315 L162,300 L163,285 L167,270 L173,258 L182,250 Z"/>',
+    '    <path d="M455,80 L470,75 L490,72 L510,75 L525,82 L535,90 L540,100 L535,110 L525,118 L510,122 L495,125 L480,122 L465,118 L455,110 L450,100 L452,90 Z"/>',
+    '    <path d="M490,55 L505,48 L520,50 L530,60 L525,72 L510,75 L495,72 L485,65 Z"/>',
+    '    <path d="M448,82 L455,78 L460,85 L455,92 L448,90 Z"/>',
+    '    <path d="M455,155 L475,148 L500,145 L525,148 L545,158 L558,172 L565,190 L568,210 L565,230 L558,250 L548,268 L535,282 L520,292 L505,298 L490,298 L475,292 L462,282 L452,268 L445,250 L440,230 L438,210 L440,190 L445,172 Z"/>',
+    '    <path d="M578,255 L585,248 L592,255 L590,270 L582,275 L575,268 Z"/>',
+    '    <path d="M530,55 L560,48 L600,42 L650,38 L700,35 L750,33 L800,35 L840,40 L870,48 L890,58 L895,70 L880,80 L850,88 L810,92 L770,90 L730,88 L690,88 L650,90 L610,92 L575,90 L550,85 L535,75 Z"/>',
+    '    <path d="M545,148 L565,142 L585,140 L605,145 L618,158 L620,172 L612,182 L598,188 L580,188 L562,182 L550,170 Z"/>',
+    '    <path d="M635,165 L655,158 L672,162 L682,175 L685,192 L680,208 L668,220 L652,225 L638,220 L628,208 L625,192 L628,175 Z"/>',
+    '    <path d="M720,155 L745,148 L768,152 L782,165 L785,180 L778,192 L762,198 L745,198 L728,192 L718,180 Z"/>',
+    '    <path d="M680,100 L720,88 L760,85 L795,90 L820,100 L835,115 L835,132 L820,145 L798,155 L772,158 L745,155 L720,148 L698,138 L682,125 L678,112 Z"/>',
+    '    <path d="M845,115 L855,108 L865,112 L868,122 L860,130 L850,128 Z"/>',
+    '    <path d="M820,118 L830,112 L838,118 L835,128 L825,130 Z"/>',
+    '    <path d="M740,310 L775,302 L810,300 L840,305 L862,318 L872,335 L870,355 L858,372 L838,382 L812,388 L785,388 L758,382 L735,368 L720,350 L715,330 L720,315 Z"/>',
+    '    <path d="M730,248 L755,242 L778,245 L792,255 L790,265 L775,270 L752,268 L735,260 Z"/>',
+    '  </g>',
+    '  <g id="map-hotspots">',
+    buildHotspotSVG('usa',       185, 167),
+    buildHotspotSVG('europe',    515, 100),
+    buildHotspotSVG('china',     780, 120),
+    buildHotspotSVG('india',     660, 190),
+    buildHotspotSVG('argentina', 225, 330),
+    '  </g>',
+    '</svg>'
+  ];
+
+  wrap.innerHTML = svgParts.join('\n');
+
+  /* Attach click handlers */
   var dockSudClicks = 0;
-  document.querySelectorAll('.map-hotspot').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var region = btn.dataset.region;
+  wrap.querySelectorAll('[data-region]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var region = el.dataset.region;
       if (region === 'argentina') {
         dockSudClicks++;
         if (dockSudClicks >= 5) {
@@ -336,14 +404,6 @@ function initMap() {
       openHotspot(region);
     });
   });
-}
-function openRamiMapModal() {
-  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
-  openModal('<div class="hotspot-info rami-modal-dark"><p style="font-family:var(--font-mono);font-size:0.8rem;letter-spacing:0.12em;color:#C9302C;margin-bottom:12px">COORDENADAS: -34.6533, -58.3508</p><h4 style="color:#C9302C">Refinería YPF — Sector 7</h4><p style="margin:8px 0;color:#aaa">Última inspección: <strong style="color:#fff">23/10/1991</strong></p><p style="margin:8px 0;color:#aaa">Personal desaparecido: <strong style="color:#C9302C">1</strong></p><p style="margin:8px 0;color:#888;font-style:italic">Causa oficial: "fuga menor sin víctimas"</p><p style="margin-top:20px;color:#C9302C;font-family:var(--font-mono);letter-spacing:0.15em;font-size:1.1rem">LO ESTÁN MINTIENDO.</p></div>', true);
-}
-function openHotspot(region) {
-  var d = MAP_DATA[region]; if (!d) return;
-  openModal('<div class="hotspot-info"><h4>'+d.name+'</h4><p><strong>Emisiones:</strong> '+d.emisiones+'</p><blockquote>'+d.quote+'</blockquote></div>', false);
 }
 
 /* ---- Voting ---- */
@@ -392,11 +452,12 @@ function initClosing() {
 
 /* ---- Games ---- */
 var GAME_MAP = {
-  lewis: 'buildLewisGame',
-  snake: 'buildSulfusnake',
-  acid:  'buildAcidDefense',
-  memo:  'buildMemotest',
-  quiz:  'buildQuiz'
+  lewis:  'buildLewisGame',
+  snake:  'buildSulfusnake',
+  acid:   'buildAcidDefense',
+  memo:   'buildMemotest',
+  quiz:   'buildQuiz',
+  escape: 'buildEscapeRami'
 };
 function initGames() {
   document.querySelectorAll('[data-game]').forEach(function(card) {

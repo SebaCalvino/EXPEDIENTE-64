@@ -274,6 +274,75 @@ window.E64 = window.E64 || {};
   }
   function playPaper()    { blip(1200, 0.04, 'square'); setTimeout(function(){ blip(800, 0.05, 'square'); }, 30); }
 
+  /* ── Extra SFX ── */
+  function playHeartbeat() {
+    if (!ensureCtx() || muted) return;
+    var now = ctx.currentTime;
+    function thump(t, vol) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 55;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(vol, t + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      o.connect(g); g.connect(sfxGain);
+      o.start(t); o.stop(t + 0.25);
+    }
+    thump(now, 0.4);
+    thump(now + 0.22, 0.25);
+  }
+
+  function playStaticBurst() {
+    if (!ensureCtx() || muted) return;
+    var now = ctx.currentTime;
+    var bufLen = ctx.sampleRate * 0.08;
+    var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+    var n = ctx.createBufferSource(); n.buffer = buf;
+    var f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 3000;
+    var g = ctx.createGain(); g.gain.value = 0.3;
+    n.connect(f); f.connect(g); g.connect(sfxGain);
+    n.start(now);
+  }
+
+  function playDrip() {
+    if (!ensureCtx() || muted) return;
+    var now = ctx.currentTime;
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(1200, now);
+    o.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+    g.gain.setValueAtTime(0.12, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    o.connect(g); g.connect(sfxGain);
+    o.start(now); o.stop(now + 0.25);
+  }
+
+  function playEerie() {
+    if (!ensureCtx() || muted) return;
+    var now = ctx.currentTime;
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(220, now);
+    o.frequency.linearRampToValueAtTime(180, now + 2);
+    o.frequency.linearRampToValueAtTime(200, now + 4);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.linearRampToValueAtTime(0.06, now + 0.5);
+    g.gain.linearRampToValueAtTime(0.04, now + 3.5);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + 4.5);
+    o.connect(g); g.connect(sfxGain);
+    o.start(now); o.stop(now + 5);
+  }
+
+  /* Schedule random eerie sounds */
+  function scheduleEerie() {
+    setTimeout(function() {
+      if (!muted) playEerie();
+      scheduleEerie();
+    }, 25000 + Math.random() * 35000);
+  }
+  scheduleEerie();
+
   /* ──────────────────────────────────────────
      MUTE
   ────────────────────────────────────────── */
@@ -286,17 +355,21 @@ window.E64 = window.E64 || {};
 
   /* Public API */
   window.E64.audio = {
-    unlock:        unlockOnGesture,
-    playScreamer:  playScreamer,
-    playClick:     playClick,
-    playUnlock:    playUnlock,
-    playStamp:     playStamp,
-    playGlitch:    playGlitch,
-    playPaper:     playPaper,
-    playRumble:    playRumble,
-    setMuted:      setMuted,
-    toggleMuted:   toggleMuted,
-    isMuted:       isMuted
+    unlock:          unlockOnGesture,
+    playScreamer:    playScreamer,
+    playClick:       playClick,
+    playUnlock:      playUnlock,
+    playStamp:       playStamp,
+    playGlitch:      playGlitch,
+    playPaper:       playPaper,
+    playRumble:      playRumble,
+    playHeartbeat:   playHeartbeat,
+    playStaticBurst: playStaticBurst,
+    playDrip:        playDrip,
+    playEerie:       playEerie,
+    setMuted:        setMuted,
+    toggleMuted:     toggleMuted,
+    isMuted:         isMuted
   };
 
 })();
