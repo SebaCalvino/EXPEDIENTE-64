@@ -7,6 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- main.css + games.css must load BEFORE rami.css so the dark theme + cursor:default in rami.css win the cascade -->
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/games.css">
   <link rel="stylesheet" href="styles/rami.css">
 </head>
 <body>
@@ -261,9 +264,6 @@
     </footer>
 
   </main>
-
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/games.css">
 
   <script src="scripts/audio.js"></script>
   <script src="scripts/games/escape-rami.js"></script>

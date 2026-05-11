@@ -320,16 +320,53 @@ function initMap() {
 
   wrap.innerHTML = svgParts.join('\n');
 
+  /* Subtle hint near the map — cryptic line below the legend */
+  var mapWrap = wrap.closest('.map-wrap');
+  if (mapWrap && !mapWrap.querySelector('.map-hidden-hint')) {
+    var hint = document.createElement('div');
+    hint.className = 'map-hidden-hint';
+    hint.style.cssText = 'margin-top:14px;text-align:center;font-family:"Special Elite",serif;font-size:0.72rem;letter-spacing:0.28em;color:rgba(201,48,44,0.35);text-transform:uppercase;opacity:0.7;';
+    hint.innerHTML = '▸ ALGUNOS FOCOS NO RESPONDEN AL PRIMER GOLPE ◂';
+    mapWrap.appendChild(hint);
+  }
+
+  /* Mark the Argentina hotspot visually different (slight extra cursor cue) */
+  var argEl = wrap.querySelector('[data-region="argentina"]');
+  if (argEl) {
+    argEl.style.cursor = 'help';
+    var titleNode = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    titleNode.textContent = 'Dock Sud — el registro está sellado. ¿Sellado por quién?';
+    argEl.appendChild(titleNode);
+  }
+
   /* Attach click handlers */
   var dockSudClicks = 0;
+  var dockSudTimer = null;
+  function resetDockSud() {
+    dockSudClicks = 0;
+    if (dockSudTimer) { clearTimeout(dockSudTimer); dockSudTimer = null; }
+  }
   wrap.querySelectorAll('[data-region]').forEach(function(el) {
     el.addEventListener('click', function() {
       var region = el.dataset.region;
       if (region === 'argentina') {
         dockSudClicks++;
+        /* Reset counter after 3s of inactivity */
+        if (dockSudTimer) clearTimeout(dockSudTimer);
+        dockSudTimer = setTimeout(resetDockSud, 3000);
+
+        /* Subtle visual feedback — pulse the hotspot a bit harder each click */
+        var circ = el.querySelector('circle');
+        if (circ) {
+          el.style.transition = 'transform 0.2s';
+          el.style.transform = 'scale(' + (1 + dockSudClicks * 0.08) + ')';
+          el.style.transformOrigin = 'center';
+          setTimeout(function() { el.style.transform = ''; }, 200);
+        }
+
         if (dockSudClicks >= 5) {
+          resetDockSud();
           openRamiMapModal();
-          dockSudClicks = 0;
           return;
         }
       }
@@ -352,7 +389,6 @@ function openHotspot(region) {
   ].join('');
   openModal(html, true);
   if (window.E64.audio) window.E64.audio.playClick();
-  if (region === 'argentina' && window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
 }
 
 function openRamiMapModal() {
@@ -369,7 +405,10 @@ function openRamiMapModal() {
     '</div>'
   ].join('');
   openModal(html, true);
-  if (window.E64.audio) window.E64.audio.playScreamer(0.6);
+  /* Solo audio (sin overlay full-screen "I SEE YOU") — el modal ya cuenta la historia */
+  if (window.E64.audio && window.E64.audio.playScreamerSound) {
+    window.E64.audio.playScreamerSound(0.5);
+  }
 }
 
 /* ---- Voting ---- */
@@ -534,31 +573,44 @@ function initEasterEggs() {
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
 
-  /* Golden Freddy sound — INMEDIATO, sin overlay de I SEE YOU duplicado */
+  /* Golden Freddy sound — INMEDIATO, sin overlay duplicado */
   if (window.E64.audio && window.E64.audio.playScreamerSound) {
     window.E64.audio.playScreamerSound(1.0);
   } else if (window.E64.audio) {
-    window.E64.audio.playScreamer(1.0);
+    window.E64.audio.playScreamerSound && window.E64.audio.playScreamerSound(1.0);
   }
 
-  /* Overlay fullscreen: Rami como fondo + "I SEE YOU" arriba */
+  /* Fullscreen overlay: goldenRami background + giant chaotic "I SEE YOU" */
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 60ms;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
   document.body.appendChild(overlay);
 
   var img = document.createElement('img');
-  img.src = 'assets/img/ramiropita.png';
+  img.src = 'assets/img/goldenRami.png';
   img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.25) brightness(0.85);';
   overlay.appendChild(img);
 
   var txt = document.createElement('div');
   txt.textContent = 'I SEE YOU';
-  txt.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Special Elite",monospace;font-size:clamp(3rem,11vw,9rem);letter-spacing:0.25em;color:#C9302C;text-shadow:0 0 50px #000,0 0 100px #000;text-align:center;';
+  txt.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Special Elite",monospace;font-size:clamp(5rem,18vw,15rem);letter-spacing:0.18em;color:#C9302C;text-shadow:0 0 80px #000,0 0 140px #000,0 0 30px #C9302C;text-align:center;line-height:1;will-change:opacity,transform;';
   overlay.appendChild(txt);
+
+  /* Chaotic blink — random opacity frames, some fully transparent so image shows through */
+  var blinkFrames = [1, 0, 1, 0.7, 0, 1, 0, 0.4, 1, 1, 0, 0.85, 0, 1, 0, 1, 0.5, 0, 1];
+  var fIdx = 0;
+  var blinkIv = setInterval(function() {
+    txt.style.opacity = blinkFrames[fIdx % blinkFrames.length];
+    /* tiny chaotic position shift */
+    var dx = (Math.random() - 0.5) * 6;
+    var dy = (Math.random() - 0.5) * 6;
+    txt.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    fIdx++;
+  }, 55);
 
   requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
   setTimeout(function() {
+    clearInterval(blinkIv);
     overlay.style.transition = 'opacity 0.6s';
     overlay.style.opacity = '0';
     setTimeout(function() {
@@ -610,7 +662,7 @@ function triggerTimeline1991Egg(polaroid) {
   if (!imgEl) return;
   var orig = imgEl.innerHTML;
   /* Replace with Rami image briefly */
-  imgEl.innerHTML = '<img src="assets/img/ramiropita.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
+  imgEl.innerHTML = '<img src="assets/img/goldenRama1.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
   if (window.E64.audio) window.E64.audio.playGlitch();
   var caption = polaroid.querySelector('.polaroid-title');
   var origTitle = caption ? caption.textContent : '';
