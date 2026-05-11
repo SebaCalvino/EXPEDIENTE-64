@@ -30,7 +30,7 @@
     <div class="access-denied-text">ACCESO DENEGADO</div>
     <div class="access-denied-sub">PRUEBAS INSUFICIENTES — EXPEDIENTE BLOQUEADO</div>
     <div class="access-denied-count" id="access-count">5</div>
-    <div class="access-denied-sub">redirigiendo en <span id="access-count">5</span>s…</div>
+    <div class="access-denied-sub">redirigiendo en 5s…</div>
   </div>
 
   <!-- Loader -->
@@ -218,6 +218,42 @@
       </div>
     </section>
 
+    <!-- SECCIÓN 5 — JUEGO: ESCAPAR DE RAMI -->
+    <section class="rami-section" id="escape-section">
+      <div class="rami-section-label">§ 05 — Si podés, escapá</div>
+
+      <div class="rami-body-text">
+        <p>
+          Ya sabés demasiado. Estás en el Sector 7.
+          Te doy una oportunidad. Encontrá la salida.
+          <strong>No te aseguro que te la voy a dar dos veces.</strong>
+        </p>
+      </div>
+
+      <div id="escape-launcher" style="text-align:center;margin:24px 0;">
+        <button
+          onclick="launchEscapeGame()"
+          style="
+            font-family:'Special Elite',serif;
+            font-size:1.1rem;
+            letter-spacing:0.2em;
+            color:#C9302C;
+            background:#0a0a0a;
+            border:2px solid #C9302C;
+            padding:14px 36px;
+            cursor:pointer;
+            box-shadow:4px 4px 0 #8B0000;
+            transition:transform 0.1s;
+          "
+          onmouseover="this.style.transform='translate(-2px,-2px)';this.style.boxShadow='6px 6px 0 #8B0000'"
+          onmouseout="this.style.transform='';this.style.boxShadow='4px 4px 0 #8B0000'"
+        >▶ ENTRAR AL SECTOR 7</button>
+      </div>
+
+      <!-- Game container (hidden until launched) -->
+      <div id="escape-container" style="display:none;max-width:600px;margin:0 auto;"></div>
+    </section>
+
     <!-- Footer -->
     <footer class="rami-footer">
       <div class="rami-warning">
@@ -229,6 +265,26 @@
 
   </main>
 
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/games.css">
+
+  <script src="scripts/audio.js"></script>
+  <script src="scripts/games/escape-rami.js"></script>
   <script src="scripts/rami.js"></script>
+
+  <script>
+    function launchEscapeGame() {
+      var launcher  = document.getElementById('escape-launcher');
+      var container = document.getElementById('escape-container');
+      if (!window.E64 || !window.E64.buildEscapeRami) {
+        alert('Error: juego no disponible.');
+        return;
+      }
+      launcher.style.display  = 'none';
+      container.style.display = 'block';
+      window.E64.buildEscapeRami(container);
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
 </body>
 </html>

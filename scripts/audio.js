@@ -159,41 +159,51 @@ window.E64 = window.E64 || {};
 
     var overlay = document.createElement('div');
     overlay.id = 'e64-isee-overlay';
-    overlay.style.cssText = [
-      'position:fixed', 'inset:0', 'z-index:99999',
-      'display:flex', 'align-items:center', 'justify-content:center',
-      'pointer-events:none', 'background:rgba(0,0,0,0.0)'
-    ].join(';');
-
-    var txt = document.createElement('div');
-    txt.textContent = 'I SEE YOU';
-    txt.style.cssText = [
-      'font-family:"Special Elite",monospace',
-      'font-size:clamp(3rem,10vw,8rem)',
-      'letter-spacing:0.3em',
-      'color:#C9302C',
-      'text-shadow:0 0 40px #C9302C,0 0 80px #C9302C,0 0 120px rgba(201,48,44,0.6)',
-      'opacity:0',
-      'transition:opacity 80ms'
-    ].join(';');
-    overlay.appendChild(txt);
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;';
     document.body.appendChild(overlay);
 
-    var flickers = 0;
-    var maxFlickers = 18;
-    function flicker() {
-      if (flickers >= maxFlickers) {
-        txt.style.opacity = '0';
-        setTimeout(function() {
-          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        }, 300);
-        return;
+    /* 1. Rama image fills screen immediately */
+    var img = document.createElement('img');
+    img.src = 'assets/img/sebastiancalvino.png';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.15) sepia(0.5);opacity:0;transition:opacity 50ms;';
+    overlay.appendChild(img);
+    requestAnimationFrame(function() { img.style.opacity = '1'; });
+
+    /* 2. After 400ms switch to "I SEE YOU" text */
+    setTimeout(function() {
+      img.style.transition = 'opacity 120ms';
+      img.style.opacity = '0';
+
+      var txt = document.createElement('div');
+      txt.textContent = 'I SEE YOU';
+      txt.style.cssText = [
+        'position:absolute', 'inset:0', 'display:flex', 'align-items:center', 'justify-content:center',
+        'font-family:"Special Elite",monospace',
+        'font-size:clamp(3rem,10vw,8rem)',
+        'letter-spacing:0.3em',
+        'color:#C9302C',
+        'text-shadow:0 0 40px #C9302C,0 0 80px #C9302C,0 0 120px rgba(201,48,44,0.6)',
+        'opacity:0',
+        'transition:opacity 80ms'
+      ].join(';');
+      overlay.appendChild(txt);
+
+      var flickers = 0;
+      var maxFlickers = 18;
+      function flicker() {
+        if (flickers >= maxFlickers) {
+          txt.style.opacity = '0';
+          setTimeout(function() {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          }, 300);
+          return;
+        }
+        txt.style.opacity = (flickers % 2 === 0) ? '1' : '0';
+        flickers++;
+        setTimeout(flicker, 80 + Math.random() * 180);
       }
-      txt.style.opacity = (flickers % 2 === 0) ? '1' : '0';
-      flickers++;
-      setTimeout(flicker, 80 + Math.random() * 180);
-    }
-    requestAnimationFrame(function() { flicker(); });
+      requestAnimationFrame(function() { flicker(); });
+    }, 400);
   }
 
   function playScreamer(intensity) {

@@ -216,10 +216,18 @@ window.E64 = window.E64 || {};
   /* ── Console egg: type "rami" globally ── */
   var consoleBuffer = '';
   document.addEventListener('keydown', function(e) {
-    // Removed check for active input to allow typing "rami" anywhere
     if (e.key && e.key.length === 1) {
       consoleBuffer += e.key.toLowerCase();
-      if (consoleBuffer.length > 10) consoleBuffer = consoleBuffer.slice(-10);
+      if (consoleBuffer.length > 20) consoleBuffer = consoleBuffer.slice(-20);
+
+      /* Cheat: "pita completo" → desbloquea todos los easter eggs */
+      if (consoleBuffer.includes('pita completo')) {
+        consoleBuffer = '';
+        EGGS.forEach(function(egg) { unlockEgg(egg); });
+        console.log('%cPITA COMPLETO — todos los registros desbloqueados.', 'color:#C9302C;font-size:12px;font-weight:bold');
+        return;
+      }
+
       if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
         consoleBuffer = '';
         unlockEgg('rami_egg_console');
