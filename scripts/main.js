@@ -234,23 +234,20 @@ function initVideos() {
 
 /* ---- Map SVG renderer ---- */
 var MAP_DATA = {
-  china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO2 urbano.' },
-  india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbon. La OMS estima 1,7M muertes prematuras anuales.' },
-  usa:       { name:'EE.UU.',           emisiones:'~2 Mt/año',         quote:'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Donde hay regulacion, el SO2 no es problema.' },
-  europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reduccion del 90% desde los 90. La Selva Negra alemana se esta recuperando lentamente.' },
-  argentina: { name:'Argentina - Dock Sud', emisiones:'Polo petroquimico critico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerias de La Plata.' }
+  china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO₂ urbano.' },
+  india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbón. La OMS estima 1,7M muertes prematuras anuales.' },
+  usa:       { name:'EE.UU.',           emisiones:'~2 Mt/año',         quote:'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Donde hay regulación, el SO₂ no es problema.' },
+  europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
+  argentina: { name:'Argentina · Dock Sud', emisiones:'Polo petroquímico crítico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerías de La Plata.' }
 };
-
-function openHotspot(region) {
-  var d = MAP_DATA[region];
-  if (!d) return;
-  openModal('<div class="hotspot-info"><h4>' + d.name + '</h4><p><strong>Emisiones:</strong> ' + d.emisiones + '</p><blockquote>' + d.quote + '</blockquote></div>', false);
-}
-
-function openRamiMapModal() {
-  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
-  openModal('<div class="hotspot-info rami-modal-dark"><p style="font-family:var(--font-mono);font-size:0.8rem;letter-spacing:0.12em;color:#C9302C;margin-bottom:12px">COORDENADAS: -34.6533, -58.3508</p><h4 style="color:#C9302C">Refineria YPF - Sector 7</h4><p style="margin:8px 0;color:#aaa">Ultima inspeccion: <strong style="color:#fff">23/10/1991</strong></p><p style="margin:8px 0;color:#aaa">Personal desaparecido: <strong style="color:#C9302C">1</strong></p><p style="margin:8px 0;color:#888;font-style:italic">Causa oficial: "fuga menor sin victimas"</p><p style="margin-top:20px;color:#C9302C;font-family:var(--font-mono);letter-spacing:0.15em;font-size:1.1rem">LO ESTAN MINTIENDO.</p></div>', true);
-}
+/* Hotspot positions as [longitude, latitude] */
+var HOTSPOT_POS = {
+  usa:       [-100,  40],
+  europe:    [  15,  50],
+  china:     [ 105,  35],
+  india:     [  78,  22],
+  argentina: [ -58, -34]
+};
 
 function buildHotspotSVG(region, x, y) {
   return [
@@ -339,6 +336,40 @@ function initMap() {
       openHotspot(region);
     });
   });
+}
+
+/* ---- Map hotspot modal ---- */
+function openHotspot(region) {
+  var d = MAP_DATA[region];
+  if (!d) return;
+  var html = [
+    '<div style="padding:32px;max-width:480px;font-family:\'Special Elite\',serif;">',
+    '<div style="font-size:0.7rem;letter-spacing:0.3em;color:#888;margin-bottom:8px">LEGAJO REGIONAL</div>',
+    '<h2 style="font-size:1.6rem;color:#C9A84C;margin:0 0 6px">' + d.name + '</h2>',
+    '<div style="font-size:0.8rem;color:#C9302C;letter-spacing:0.15em;margin-bottom:20px">EMISIONES: ' + d.emisiones + '</div>',
+    '<p style="color:#ccc;line-height:1.7;font-family:\'Inter\',sans-serif;font-size:0.95rem">' + d.quote + '</p>',
+    '</div>'
+  ].join('');
+  openModal(html, true);
+  if (window.E64.audio) window.E64.audio.playClick();
+  if (region === 'argentina' && window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
+}
+
+function openRamiMapModal() {
+  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
+  var html = [
+    '<div style="padding:32px;max-width:480px;font-family:\'Special Elite\',serif;text-align:center;">',
+    '<div style="font-size:3rem;margin-bottom:12px">⚠</div>',
+    '<h2 style="color:#C9302C;font-size:1.4rem;letter-spacing:0.2em">ACCESO RESTRINGIDO</h2>',
+    '<p style="color:#888;margin:16px 0;font-family:\'Special Elite\',serif;font-size:1rem;line-height:1.7">',
+    'Dock Sud, 23/10/1991.<br>Sector 7 fue clausurado.<br><br>',
+    '<em style="color:rgba(201,48,44,0.7)">El legajo fue bloqueado por orden superior.<br>Hay pruebas que no deben circular.</em>',
+    '</p>',
+    '<div style="font-size:0.65rem;color:#444;letter-spacing:0.2em;margin-top:20px">— R.P.</div>',
+    '</div>'
+  ].join('');
+  openModal(html, true);
+  if (window.E64.audio) window.E64.audio.playScreamer(0.6);
 }
 
 /* ---- Voting ---- */
@@ -502,41 +533,29 @@ function initEasterEggs() {
 
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
-
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;opacity:0;transition:opacity 60ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;';
+  var txt = document.createElement('p');
+  txt.textContent = 'I SEE YOU';
+  txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:0.2em;text-align:center;animation:shake 0.3s infinite;';
+  overlay.appendChild(txt);
   document.body.appendChild(overlay);
+  if (window.E64.audio) window.E64.audio.playRumble();
 
-  /* Sonido INMEDIATO */
-  if (window.E64.audio) window.E64.audio.playScreamer(1.0);
-
-  /* Fade in */
-  requestAnimationFrame(function() { overlay.style.opacity = '1'; });
-
-  /* Paso 1 (50ms): foto de Rama a pantalla completa */
+  /* Subliminal Rami at 2s */
   setTimeout(function() {
     var img = document.createElement('img');
-    img.src = 'assets/img/sebastiancalvino.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.2) sepia(0.3);';
+    img.src = 'assets/img/ramiropita.png';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
     overlay.appendChild(img);
-  }, 50);
+    requestAnimationFrame(function() { img.style.opacity = '1'; });
+    if (window.E64.audio) window.E64.audio.playScreamer(0.9);
+    setTimeout(function() { img.style.opacity = '0'; }, 300);
+  }, 1800);
 
-  /* Paso 2 (700ms): "I SEE YOU" encima */
   setTimeout(function() {
-    var txt = document.createElement('p');
-    txt.textContent = 'I SEE YOU';
-    txt.style.cssText = 'position:absolute;z-index:2;color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,8vw,5rem);letter-spacing:0.2em;text-align:center;text-shadow:0 0 40px #C9302C,0 0 80px rgba(201,48,44,0.5);animation:ramiShake 0.15s linear infinite;';
-    overlay.appendChild(txt);
-  }, 700);
-
-  /* Paso 3 (3500ms): fade out */
-  setTimeout(function() {
-    overlay.style.transition = 'opacity 0.5s';
-    overlay.style.opacity = '0';
-    setTimeout(function() {
-      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    }, 500);
-  }, 3500);
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  }, 4000);
 }
 
 function showCursedNote() {
@@ -582,7 +601,7 @@ function triggerTimeline1991Egg(polaroid) {
   if (!imgEl) return;
   var orig = imgEl.innerHTML;
   /* Replace with Rami image briefly */
-  imgEl.innerHTML = '<img src="assets/img/ramapita2.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.2) saturate(0.2) blur(1px) sepia(0.4);">';
+  imgEl.innerHTML = '<img src="assets/img/ramiropita.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
   if (window.E64.audio) window.E64.audio.playGlitch();
   var caption = polaroid.querySelector('.polaroid-title');
   var origTitle = caption ? caption.textContent : '';
