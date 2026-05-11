@@ -159,93 +159,58 @@ window.E64 = window.E64 || {};
 
     var overlay = document.createElement('div');
     overlay.id = 'e64-isee-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;display:flex;align-items:center;justify-content:center;';
     document.body.appendChild(overlay);
 
-    /* 1. Rama image fills screen immediately */
-    var img = document.createElement('img');
-    img.src = 'assets/img/sebastiancalvino.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.15) sepia(0.5);opacity:0;transition:opacity 50ms;';
-    overlay.appendChild(img);
-    requestAnimationFrame(function() { img.style.opacity = '1'; });
+    var txt = document.createElement('div');
+    txt.textContent = 'I SEE YOU';
+    txt.style.cssText = [
+      'font-family:"Special Elite",monospace',
+      'font-size:clamp(4rem,15vw,11rem)',
+      'letter-spacing:0.25em',
+      'color:#C9302C',
+      'text-shadow:0 0 60px #C9302C,0 0 120px rgba(201,48,44,0.6)',
+      'opacity:0',
+      'transition:opacity 80ms',
+      'text-align:center'
+    ].join(';');
+    overlay.appendChild(txt);
 
-    /* 2. After 400ms switch to "I SEE YOU" text */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() { txt.style.opacity = '1'; });
+    });
+
+    /* Fade out after 2.2s, remove at 3s total */
     setTimeout(function() {
-      img.style.transition = 'opacity 120ms';
-      img.style.opacity = '0';
-
-      var txt = document.createElement('div');
-      txt.textContent = 'I SEE YOU';
-      txt.style.cssText = [
-        'position:absolute', 'inset:0', 'display:flex', 'align-items:center', 'justify-content:center',
-        'font-family:"Special Elite",monospace',
-        'font-size:clamp(3rem,10vw,8rem)',
-        'letter-spacing:0.3em',
-        'color:#C9302C',
-        'text-shadow:0 0 40px #C9302C,0 0 80px #C9302C,0 0 120px rgba(201,48,44,0.6)',
-        'opacity:0',
-        'transition:opacity 80ms'
-      ].join(';');
-      overlay.appendChild(txt);
-
-      var flickers = 0;
-      var maxFlickers = 18;
-      function flicker() {
-        if (flickers >= maxFlickers) {
-          txt.style.opacity = '0';
-          setTimeout(function() {
-            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-          }, 300);
-          return;
-        }
-        txt.style.opacity = (flickers % 2 === 0) ? '1' : '0';
-        flickers++;
-        setTimeout(flicker, 80 + Math.random() * 180);
-      }
-      requestAnimationFrame(function() { flicker(); });
-    }, 400);
+      txt.style.transition = 'opacity 0.6s';
+      txt.style.opacity = '0';
+      setTimeout(function() {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 700);
+    }, 2200);
   }
 
   function playScreamer(intensity) {
     if (muted) return;
     intensity = intensity || 1;
 
-    /* Play Golden Freddy MP3 (5s) */
+    /* Golden Freddy MP3 — play immediately, stop after 4 seconds */
     if (screamerAudio) {
       try {
+        screamerAudio.pause();
         screamerAudio.currentTime = 0;
-        screamerAudio.volume = Math.min(1, 0.85 * intensity);
+        screamerAudio.volume = Math.min(1, 0.9 * intensity);
         screamerAudio.play().catch(function() {});
+        setTimeout(function() {
+          if (screamerAudio && !screamerAudio.paused) {
+            screamerAudio.pause();
+            screamerAudio.currentTime = 0;
+          }
+        }, 4000);
       } catch(e) {}
     }
 
-    /* Fallback WebAudio impact layer for immediate punch */
-    if (ensureCtx()) {
-      var now = ctx.currentTime;
-      /* Sub thump */
-      var sub = ctx.createOscillator();
-      var subG = ctx.createGain();
-      sub.type = 'sine';
-      sub.frequency.setValueAtTime(80, now);
-      sub.frequency.exponentialRampToValueAtTime(25, now + 0.5);
-      subG.gain.setValueAtTime(0.0001, now);
-      subG.gain.exponentialRampToValueAtTime(0.5 * intensity, now + 0.02);
-      subG.gain.exponentialRampToValueAtTime(0.0001, now + 1.2);
-      sub.connect(subG); subG.connect(sfxGain);
-      sub.start(now); sub.stop(now + 1.3);
-      /* Noise burst */
-      var bufLen = ctx.sampleRate * 0.4;
-      var buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
-      var data = buf.getChannelData(0);
-      for (var i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
-      var noise = ctx.createBufferSource(); noise.buffer = buf;
-      var nFilt = ctx.createBiquadFilter(); nFilt.type = 'highpass'; nFilt.frequency.value = 2000;
-      var nGain = ctx.createGain(); nGain.gain.value = 0.3 * intensity;
-      noise.connect(nFilt); nFilt.connect(nGain); nGain.connect(sfxGain);
-      noise.start(now);
-    }
-
-    /* "I SEE YOU" text overlay for 5 seconds */
+    /* "I SEE YOU" text overlay — 3 seconds, black bg, no image */
     showISeeYou();
   }
 

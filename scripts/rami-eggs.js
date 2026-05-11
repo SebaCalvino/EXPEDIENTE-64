@@ -193,7 +193,7 @@ window.E64 = window.E64 || {};
       /* Show Rami for 0.2s */
       if (document.querySelector('img[src*="ramapita"]') || true) {
         var img = document.createElement('img');
-        img.src = 'assets/img/sebastiancalvino.png';
+        img.src = 'assets/img/ramapita3.png';
         img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99998;pointer-events:none;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);';
         document.body.appendChild(img);
         setTimeout(function() {
@@ -304,92 +304,52 @@ window.E64 = window.E64 || {};
 
   /* ── MEGA UNLOCK ANIMATION — all eggs collected ── */
   function triggerMegaUnlock() {
-    /* Already triggered? */
     if (window.E64._megaUnlockDone) return;
     window.E64._megaUnlockDone = true;
 
-    /* 1. Screamer sound */
-    if (window.E64.audio) {
-      window.E64.audio.playScreamer(1.5);
-    }
+    /* 1. Golden Freddy sound */
+    if (window.E64.audio) window.E64.audio.playScreamer(1.2);
 
-    /* 2. Full-screen terror overlay */
+    /* 2. Black overlay fade in */
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.3s;overflow:hidden;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.6s;overflow:hidden;';
     document.body.appendChild(overlay);
-
     requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
-    /* 3. Distortion CSS injected */
-    var style = document.createElement('style');
-    style.id = 'mega-unlock-style';
-    style.textContent = [
-      '@keyframes terrorDistort {',
-      '  0%   { filter: none; }',
-      '  10%  { filter: hue-rotate(180deg) saturate(3) contrast(2); }',
-      '  20%  { filter: invert(1) hue-rotate(90deg); }',
-      '  30%  { filter: saturate(0) contrast(3) brightness(0.3); }',
-      '  40%  { filter: hue-rotate(-90deg) saturate(5); }',
-      '  50%  { filter: invert(0.8) sepia(1) hue-rotate(200deg); }',
-      '  60%  { filter: contrast(4) brightness(0.2); }',
-      '  70%  { filter: hue-rotate(270deg) saturate(2); }',
-      '  80%  { filter: invert(1); }',
-      '  90%  { filter: saturate(0) brightness(0.1); }',
-      '  100% { filter: none; }',
-      '}',
-      '@keyframes terrorShake {',
-      '  0%,100% { transform: translate(0); }',
-      '  10% { transform: translate(-15px, 8px) rotate(1deg); }',
-      '  20% { transform: translate(12px, -10px) rotate(-1.5deg); }',
-      '  30% { transform: translate(-8px, 15px) rotate(0.5deg); }',
-      '  40% { transform: translate(18px, -5px) rotate(-2deg); }',
-      '  50% { transform: translate(-12px, 12px) rotate(1deg); }',
-      '  60% { transform: translate(8px, -8px) rotate(-0.5deg); }',
-      '  70% { transform: translate(-18px, 5px) rotate(2deg); }',
-      '  80% { transform: translate(10px, -12px) rotate(-1deg); }',
-      '  90% { transform: translate(-5px, 8px) rotate(0.5deg); }',
-      '}'
-    ].join('\n');
-    document.head.appendChild(style);
-
-    /* 4. Show Rami face filling screen */
+    /* 3. Dark photo fade in with low brightness */
     setTimeout(function() {
       var img = document.createElement('img');
-      img.src = 'assets/img/sebastiancalvino.png';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(2) saturate(0) sepia(0.8) hue-rotate(-10deg);animation:terrorShake 0.1s linear infinite;';
+      img.src = 'assets/img/ramiropita.png';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.2) contrast(1.5) saturate(0.2);opacity:0;transition:opacity 2s;';
       overlay.appendChild(img);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { img.style.opacity = '1'; });
+      });
 
-      /* Red text overlay */
+      /* Minimal text — bottom center, subtle */
       var txt = document.createElement('div');
-      txt.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;z-index:2;';
-      txt.innerHTML = [
-        '<div style="font-family:\'Special Elite\',serif;font-size:clamp(2rem,8vw,5rem);color:#C9302C;text-shadow:0 0 40px #C9302C;letter-spacing:0.1em;text-align:center;animation:terrorShake 0.15s linear infinite">EXPEDIENTE COMPLETO</div>',
-        '<div style="font-family:\'Special Elite\',serif;font-size:clamp(0.8rem,2vw,1.2rem);color:#fff;letter-spacing:0.3em;text-align:center;opacity:0.8">ÉL LO SABE. VOS LO SABÉS.</div>'
-      ].join('');
+      txt.style.cssText = 'position:absolute;bottom:12vh;left:0;right:0;text-align:center;font-family:"Special Elite",serif;font-size:clamp(0.9rem,2.5vw,1.4rem);color:rgba(201,48,44,0.75);letter-spacing:0.4em;text-transform:uppercase;opacity:0;transition:opacity 1.2s 1s;';
+      txt.textContent = 'EXPEDIENTE COMPLETO';
       overlay.appendChild(txt);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { txt.style.opacity = '1'; });
+      });
+    }, 500);
 
-      /* Apply distortion to the whole page behind */
-      document.body.style.animation = 'terrorDistort 0.5s linear 3';
-    }, 300);
-
-    /* 5. After 3s, fade out and redirect to rami.html */
+    /* 4. Long fade out at 5s */
     setTimeout(function() {
-      overlay.style.transition = 'opacity 1s';
+      overlay.style.transition = 'opacity 2.5s';
       overlay.style.opacity = '0';
-      document.body.style.animation = '';
       setTimeout(function() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        /* Show unlock button / redirect */
-        var btn = document.getElementById('rami-unlock-btn');
-        if (btn) {
-          btn.style.display = 'block';
-          btn.style.animation = 'blink 0.8s step-end infinite';
-          btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        /* Also trigger the card reveal */
+        /* Reveal Rami card and scroll to it */
         if (window.E64.revealRamiCard) window.E64.revealRamiCard();
-      }, 1000);
-    }, 3500);
+        var btn = document.getElementById('rami-unlock-btn');
+        if (btn) { btn.style.display = 'block'; btn.style.animation = 'blink 0.8s step-end infinite'; }
+        var ramiCard = document.querySelector('.agent-card[data-agent="rami"]');
+        if (ramiCard) ramiCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 2600);
+    }, 5000);
   }
 
 })();

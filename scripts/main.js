@@ -545,7 +545,7 @@ function showRamiKonami() {
   /* Subliminal Rami at 2s */
   setTimeout(function() {
     var img = document.createElement('img');
-    img.src = 'assets/img/sebastiancalvino.png';
+    img.src = 'assets/img/ramiropita.png';
     img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
     overlay.appendChild(img);
     requestAnimationFrame(function() { img.style.opacity = '1'; });
@@ -601,7 +601,7 @@ function triggerTimeline1991Egg(polaroid) {
   if (!imgEl) return;
   var orig = imgEl.innerHTML;
   /* Replace with Rami image briefly */
-  imgEl.innerHTML = '<img src="assets/img/ramapita2.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.2) saturate(0.2) blur(1px) sepia(0.4);">';
+  imgEl.innerHTML = '<img src="assets/img/ramiropita.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
   if (window.E64.audio) window.E64.audio.playGlitch();
   var caption = polaroid.querySelector('.polaroid-title');
   var origTitle = caption ? caption.textContent : '';
