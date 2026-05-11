@@ -159,35 +159,50 @@ window.E64 = window.E64 || {};
 
     var overlay = document.createElement('div');
     overlay.id = 'e64-isee-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;display:flex;align-items:center;justify-content:center;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;';
     document.body.appendChild(overlay);
+
+    /* goldenRami fondo — visible cuando el texto se vuelve transparente */
+    var img = document.createElement('img');
+    img.src = 'assets/img/goldenRami.png';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.2) brightness(0.85);';
+    overlay.appendChild(img);
 
     var txt = document.createElement('div');
     txt.textContent = 'I SEE YOU';
     txt.style.cssText = [
+      'position:relative',
       'font-family:"Special Elite",monospace',
-      'font-size:clamp(4rem,15vw,11rem)',
-      'letter-spacing:0.25em',
+      'font-size:clamp(5rem,18vw,15rem)',
+      'letter-spacing:0.18em',
       'color:#C9302C',
-      'text-shadow:0 0 60px #C9302C,0 0 120px rgba(201,48,44,0.6)',
-      'opacity:0',
-      'transition:opacity 80ms',
-      'text-align:center'
+      'text-shadow:0 0 80px #000,0 0 140px #000,0 0 30px #C9302C',
+      'opacity:1',
+      'text-align:center',
+      'line-height:1',
+      'will-change:opacity,transform'
     ].join(';');
     overlay.appendChild(txt);
 
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() { txt.style.opacity = '1'; });
-    });
+    /* Chaotic blink — frames rápidos, algunos a opacidad 0 (la imagen se ve detrás) */
+    var blinkFrames = [1, 0, 1, 0.7, 0, 1, 0, 0.4, 1, 1, 0, 0.85, 0, 1, 0, 1, 0.5, 0, 1];
+    var fIdx = 0;
+    var blinkIv = setInterval(function() {
+      txt.style.opacity = blinkFrames[fIdx % blinkFrames.length];
+      var dx = (Math.random() - 0.5) * 6;
+      var dy = (Math.random() - 0.5) * 6;
+      txt.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      fIdx++;
+    }, 55);
 
-    /* Fade out after 2.2s, remove at 3s total */
     setTimeout(function() {
-      txt.style.transition = 'opacity 0.6s';
-      txt.style.opacity = '0';
+      clearInterval(blinkIv);
+      overlay.style.transition = 'opacity 0.6s';
+      overlay.style.opacity = '0';
       setTimeout(function() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       }, 700);
-    }, 2200);
+    }, 2400);
   }
 
   function playScreamerSound(intensity) {

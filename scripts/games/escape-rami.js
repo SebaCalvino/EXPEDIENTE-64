@@ -46,7 +46,7 @@ window.E64.buildEscapeRami = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/ramiropita.png';
+    img.src = 'assets/img/goldenRami.png';
   })();
 
   /* AudioContext */
@@ -340,11 +340,18 @@ window.E64.buildEscapeRami = function(container) {
   }
 
   var onKey = function(e) {
+    if (!alive) return;
+    var k = e.key;
+    var isMove = (k === 'ArrowUp' || k === 'ArrowDown' || k === 'ArrowLeft' || k === 'ArrowRight' ||
+                  k === 'w' || k === 'a' || k === 's' || k === 'd');
+    if (!isMove) return;
+    /* Stop the page from scrolling while the game is active */
+    e.preventDefault();
     getAudio();
-    if (e.key === 'ArrowUp'    || e.key === 'w') movePlayer(-1, 0);
-    else if (e.key === 'ArrowDown'  || e.key === 's') movePlayer(1, 0);
-    else if (e.key === 'ArrowLeft'  || e.key === 'a') movePlayer(0, -1);
-    else if (e.key === 'ArrowRight' || e.key === 'd') movePlayer(0, 1);
+    if (k === 'ArrowUp'    || k === 'w') movePlayer(-1, 0);
+    else if (k === 'ArrowDown'  || k === 's') movePlayer(1, 0);
+    else if (k === 'ArrowLeft'  || k === 'a') movePlayer(0, -1);
+    else if (k === 'ArrowRight' || k === 'd') movePlayer(0, 1);
   };
   document.addEventListener('keydown', onKey);
 

@@ -54,7 +54,7 @@ window.E64.buildSulfusnake = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/sebastiancalvino.png';
+    img.src = 'assets/img/goldenRami.png';
   })();
 
   function reset() {
@@ -131,42 +131,42 @@ window.E64.buildSulfusnake = function(container) {
     /* 1. Unlock easter egg */
     if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake');
 
-    /* 2. Sonido INMEDIATO — screamer + grito humano */
-    if (window.E64.audio && window.E64.audio.playScreamer) {
-      window.E64.audio.playScreamer(1.2);
+    /* 2. Golden Freddy sonido INMEDIATO (sin overlay duplicado de audio.js) */
+    if (window.E64.audio && window.E64.audio.playScreamerSound) {
+      window.E64.audio.playScreamerSound(1.2);
     }
     playHumanScream();
 
-    /* 3. Overlay negro */
+    /* 3. Overlay fullscreen: goldenRami + "I SEE YOU" enorme con parpadeo caótico */
     var overlay2 = document.createElement('div');
-    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 60ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
     document.body.appendChild(overlay2);
+
+    var img = document.createElement('img');
+    img.src = 'assets/img/goldenRami.png';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.2) brightness(0.9);';
+    overlay2.appendChild(img);
+
+    var txt = document.createElement('div');
+    txt.textContent = 'I SEE YOU';
+    txt.style.cssText = 'position:relative;font-family:"Special Elite",monospace;font-size:clamp(5rem,18vw,15rem);letter-spacing:0.18em;color:#C9302C;text-shadow:0 0 80px #000,0 0 140px #000,0 0 30px #C9302C;text-align:center;line-height:1;will-change:opacity,transform;';
+    overlay2.appendChild(txt);
+
+    var blinkFrames = [1, 0, 1, 0.7, 0, 1, 0, 0.4, 1, 1, 0, 0.85, 0, 1, 0, 1, 0.5, 0, 1];
+    var fIdx = 0;
+    var blinkIv = setInterval(function() {
+      txt.style.opacity = blinkFrames[fIdx % blinkFrames.length];
+      var dx = (Math.random() - 0.5) * 6;
+      var dy = (Math.random() - 0.5) * 6;
+      txt.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      fIdx++;
+    }, 55);
 
     requestAnimationFrame(function() { overlay2.style.opacity = '1'; });
 
-    /* 4. Paso 1 (50ms): foto de Rama a pantalla completa */
     setTimeout(function() {
-      if (ramiImg) {
-        var img = document.createElement('img');
-        img.src = ramiImg.src;
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.2) sepia(0.3);animation:ramiShake 0.12s linear infinite;';
-        overlay2.appendChild(img);
-      } else {
-        overlay2.style.background = '#8B0000';
-      }
-    }, 50);
-
-    /* 5. Paso 2 (700ms): "I SEE YOU" encima */
-    setTimeout(function() {
-      var txt = document.createElement('div');
-      txt.textContent = 'I SEE YOU';
-      txt.style.cssText = 'position:absolute;z-index:2;color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(3rem,10vw,6rem);letter-spacing:0.2em;text-align:center;text-shadow:0 0 40px #C9302C,0 0 80px rgba(201,48,44,0.5);animation:ramiShake 0.15s linear infinite;';
-      overlay2.appendChild(txt);
-    }, 700);
-
-    /* 6. Paso 3 (1800ms): fade out y game over */
-    setTimeout(function() {
-      overlay2.style.transition = 'opacity 0.4s';
+      clearInterval(blinkIv);
+      overlay2.style.transition = 'opacity 0.6s';
       overlay2.style.opacity = '0';
       setTimeout(function() {
         if (overlay2.parentNode) overlay2.parentNode.removeChild(overlay2);
@@ -175,8 +175,8 @@ window.E64.buildSulfusnake = function(container) {
           'GAME OVER',
           true
         );
-      }, 400);
-    }, 1800);
+      }, 700);
+    }, 2400);
   }
 
   /* Grito humano terrorífico sintetizado */

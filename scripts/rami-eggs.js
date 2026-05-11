@@ -193,7 +193,7 @@ window.E64 = window.E64 || {};
       /* Show Rami for 0.2s */
       if (document.querySelector('img[src*="ramapita"]') || true) {
         var img = document.createElement('img');
-        img.src = 'assets/img/ramapita3.png';
+        img.src = 'assets/img/goldenRama1.png';
         img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99998;pointer-events:none;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);';
         document.body.appendChild(img);
         setTimeout(function() {
@@ -213,34 +213,51 @@ window.E64 = window.E64 || {};
   });
   resetIdle();
 
-  /* ── Console egg: type "rami" globally ── */
+  /* ── Console egg: type "rami" globally; "rami egg" = testing mode ── */
   var consoleBuffer = '';
+  var ramiPending = null;
+
+  function unlockAll(label) {
+    EGGS.forEach(function(egg) { unlockedSet[egg] = true; });
+    updateRamiCard(EGGS.length);
+    revealRamiCard();
+    setTimeout(triggerMegaUnlock, 400);
+  }
+
   document.addEventListener('keydown', function(e) {
-    if (e.key && e.key.length === 1) {
-      consoleBuffer += e.key.toLowerCase();
-      if (consoleBuffer.length > 20) consoleBuffer = consoleBuffer.slice(-20);
+    /* Capture printable chars regardless of focus target — listener is on document */
+    if (!e.key || e.key.length !== 1) return;
+    consoleBuffer += e.key.toLowerCase();
+    if (consoleBuffer.length > 30) consoleBuffer = consoleBuffer.slice(-30);
 
-      /* Cheat: "pita completo" → desbloquea TODO + mega-unlock */
-      if (consoleBuffer.includes('pita completo')) {
-        consoleBuffer = '';
-        EGGS.forEach(function(egg) { unlockedSet[egg] = true; });
-        updateRamiCard(EGGS.length);
-        revealRamiCard();
-        setTimeout(triggerMegaUnlock, 400);
-        console.log('%cPITA COMPLETO — todos los registros desbloqueados.', 'color:#C9302C;font-size:12px;font-weight:bold');
-        return;
-      }
+    /* Cheat 1: "pita completo" → desbloquea TODO + mega-unlock */
+    if (consoleBuffer.includes('pita completo')) {
+      consoleBuffer = '';
+      if (ramiPending) { clearTimeout(ramiPending); ramiPending = null; }
+      unlockAll();
+      return;
+    }
 
-      if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
+    /* Cheat 2: "rami egg" → testing mode, desbloquea TODO sin sonido */
+    if (consoleBuffer.includes('rami egg')) {
+      consoleBuffer = '';
+      if (ramiPending) { clearTimeout(ramiPending); ramiPending = null; }
+      unlockAll();
+      return;
+    }
+
+    /* Console egg: type "rami" alone (debounce so "rami egg" can override) */
+    if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
+      if (ramiPending) clearTimeout(ramiPending);
+      ramiPending = setTimeout(function() {
+        ramiPending = null;
+        if (isUnlocked('rami_egg_console')) return;
         consoleBuffer = '';
-        /* Golden Freddy grito al tipear "rami" */
         if (window.E64.audio && window.E64.audio.playScreamerSound) {
           window.E64.audio.playScreamerSound(0.7);
         }
         window.E64.unlockEgg('rami_egg_console');
-        console.log('%c ██████╗  █████╗ ███╗   ███╗██╗\n██╔══██╗██╔══██╗████╗ ████║██║\n██████╔╝███████║██╔████╔██║██║\n██╔══██╗██╔══██║██║╚██╔╝██║██║\n██║  ██║██║  ██║██║ ╚═╝ ██║██║\n╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝', 'color:#C9302C;font-size:10px');
-        console.warn('Te oigo escribirme. — R.P.');
-      }
+      }, 700);
     }
   });
 
@@ -329,7 +346,7 @@ window.E64 = window.E64 || {};
     /* 3. Dark photo fade in with low brightness */
     setTimeout(function() {
       var img = document.createElement('img');
-      img.src = 'assets/img/ramiropita.png';
+      img.src = 'assets/img/goldenRami.png';
       img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.2) contrast(1.5) saturate(0.2);opacity:0;transition:opacity 2s;';
       overlay.appendChild(img);
       requestAnimationFrame(function() {
