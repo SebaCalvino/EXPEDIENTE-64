@@ -131,53 +131,52 @@ window.E64.buildSulfusnake = function(container) {
     /* 1. Unlock easter egg */
     if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake');
 
-    /* 2. Screamer audio — usa el sistema central si está disponible, con grito humano terrorífico */
+    /* 2. Sonido INMEDIATO — screamer + grito humano */
     if (window.E64.audio && window.E64.audio.playScreamer) {
       window.E64.audio.playScreamer(1.2);
     }
-    /* Siempre reproducir el grito humano sintetizado adicional */
     playHumanScream();
 
-    /* 3. Black overlay */
+    /* 3. Overlay negro */
     var overlay2 = document.createElement('div');
-    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 80ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 60ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
     document.body.appendChild(overlay2);
 
-    requestAnimationFrame(function() {
-      overlay2.style.opacity = '1';
-    });
+    requestAnimationFrame(function() { overlay2.style.opacity = '1'; });
 
-    /* 4. Rami full-screen image */
+    /* 4. Paso 1 (50ms): foto de Rama a pantalla completa */
     setTimeout(function() {
       if (ramiImg) {
         var img = document.createElement('img');
         img.src = ramiImg.src;
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);';
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.2) sepia(0.3);animation:ramiShake 0.12s linear infinite;';
         overlay2.appendChild(img);
       } else {
         overlay2.style.background = '#8B0000';
-        var txt = document.createElement('div');
-        txt.textContent = 'R.P.';
-        txt.style.cssText = 'font-size:25vw;color:#C9302C;font-family:serif;font-weight:bold;';
-        overlay2.appendChild(txt);
       }
-      /* Screen shake */
-      overlay2.style.animation = 'ramiShake 0.15s linear infinite';
     }, 50);
 
-    /* 5. End screamer after 1.2s */
+    /* 5. Paso 2 (700ms): "I SEE YOU" encima */
     setTimeout(function() {
+      var txt = document.createElement('div');
+      txt.textContent = 'I SEE YOU';
+      txt.style.cssText = 'position:absolute;z-index:2;color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(3rem,10vw,6rem);letter-spacing:0.2em;text-align:center;text-shadow:0 0 40px #C9302C,0 0 80px rgba(201,48,44,0.5);animation:ramiShake 0.15s linear infinite;';
+      overlay2.appendChild(txt);
+    }, 700);
+
+    /* 6. Paso 3 (1800ms): fade out y game over */
+    setTimeout(function() {
+      overlay2.style.transition = 'opacity 0.4s';
       overlay2.style.opacity = '0';
       setTimeout(function() {
         if (overlay2.parentNode) overlay2.parentNode.removeChild(overlay2);
-        /* Game over modal */
         endGame(
-          'Te comiste a Rami Pita. No deberías haber hecho eso. Algo se despertó.',
+          'Te comiste a Rami Pita. No deberias haber hecho eso. Algo se desperto.',
           'GAME OVER',
           true
         );
-      }, 300);
-    }, 1200);
+      }, 400);
+    }, 1800);
   }
 
   /* Grito humano terrorífico sintetizado */

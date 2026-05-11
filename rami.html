@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/rami.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/games.css">
+  <link rel="stylesheet" href="styles/animations.css">
 </head>
 <body>
 
@@ -30,7 +33,7 @@
     <div class="access-denied-text">ACCESO DENEGADO</div>
     <div class="access-denied-sub">PRUEBAS INSUFICIENTES — EXPEDIENTE BLOQUEADO</div>
     <div class="access-denied-count" id="access-count">5</div>
-    <div class="access-denied-sub">redirigiendo en <span id="access-count">5</span>s…</div>
+    <div class="access-denied-sub">redirigiendo en <span id="access-count-msg">5</span>s…</div>
   </div>
 
   <!-- Loader -->
@@ -218,6 +221,15 @@
       </div>
     </section>
 
+    <!-- SECCIÓN 5 — JUEGO: ESCAPAR DE RAMI -->
+    <section class="rami-section">
+      <div class="rami-section-label">§ 05 — Si podés, escapá</div>
+      <div class="rami-body-text" style="margin-bottom:20px;">
+        <p>Estás en la refinería. Yo estoy adentro también. Encontrá la salida antes de que te encuentre.</p>
+      </div>
+      <div id="escape-game-container"></div>
+    </section>
+
     <!-- Footer -->
     <footer class="rami-footer">
       <div class="rami-warning">
@@ -229,6 +241,17 @@
 
   </main>
 
+  <script src="scripts/audio.js"></script>
+  <script src="scripts/games/escape-rami.js"></script>
   <script src="scripts/rami.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      /* Iniciar juego de escape */
+      var container = document.getElementById('escape-game-container');
+      if (container && window.E64 && window.E64.buildEscapeRami) {
+        window.E64.buildEscapeRami(container);
+      }
+    });
+  </script>
 </body>
 </html>

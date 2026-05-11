@@ -234,88 +234,23 @@ function initVideos() {
 
 /* ---- Map SVG renderer ---- */
 var MAP_DATA = {
-  china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO₂ urbano.' },
-  india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbón. La OMS estima 1,7M muertes prematuras anuales.' },
-  usa:       { name:'EE.UU.',           emisiones:'~2 Mt/año',         quote:'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Donde hay regulación, el SO₂ no es problema.' },
-  europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reducción del 90% desde los 90. La Selva Negra alemana se está recuperando lentamente.' },
-  argentina: { name:'Argentina · Dock Sud', emisiones:'Polo petroquímico crítico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerías de La Plata.' }
+  china:     { name:'China',            emisiones:'~10 Mt/año (2020)', quote:'El mayor emisor mundial; sus regulaciones desde 2010 redujeron casi 70% del SO2 urbano.' },
+  india:     { name:'India',            emisiones:'~8 Mt/año',         quote:'Lidera hoy las emisiones por quema de carbon. La OMS estima 1,7M muertes prematuras anuales.' },
+  usa:       { name:'EE.UU.',           emisiones:'~2 Mt/año',         quote:'Las emisiones cayeron 95% desde 1980 gracias al Clean Air Act. Donde hay regulacion, el SO2 no es problema.' },
+  europe:    { name:'Europa',           emisiones:'~2 Mt/año',         quote:'Reduccion del 90% desde los 90. La Selva Negra alemana se esta recuperando lentamente.' },
+  argentina: { name:'Argentina - Dock Sud', emisiones:'Polo petroquimico critico', quote:'Estudios de la UBA documentan impactos respiratorios sostenidos en barrios cercanos a Dock Sud y las refinerias de La Plata.' }
 };
-/* Hotspot positions as [longitude, latitude] */
-var HOTSPOT_POS = {
-  usa:       [-100,  40],
-  europe:    [  15,  50],
-  china:     [ 105,  35],
-  india:     [  78,  22],
-  argentina: [ -58, -34]
-};
-function initMap() {
-  var canvas = document.getElementById('map-canvas');
-  if (!canvas) return;
-  var wrap = canvas.parentElement;
 
-  function drawMap() {
-    var world = window.E64.WORLD_GRID;
-    if (!world) return;
-    var ROWS = world.rows, COLS = world.cols, grid = world.grid;
+function openHotspot(region) {
+  var d = MAP_DATA[region];
+  if (!d) return;
+  openModal('<div class="hotspot-info"><h4>' + d.name + '</h4><p><strong>Emisiones:</strong> ' + d.emisiones + '</p><blockquote>' + d.quote + '</blockquote></div>', false);
+}
 
-    var cw = canvas.clientWidth || wrap.clientWidth || 800;
-    var ch = Math.round(cw * ROWS / COLS);
-    canvas.width  = cw;
-    canvas.height = ch;
-
-    var cellW = cw / COLS;
-    var cellH = ch / ROWS;
-    var ctx = canvas.getContext('2d');
-
-    /* Background */
-    ctx.fillStyle = '#07090f';
-    ctx.fillRect(0, 0, cw, ch);
-
-    /* Grid lines */
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-    ctx.lineWidth = 0.5;
-    for (var c = 0; c <= COLS; c++) {
-      ctx.beginPath();
-      ctx.moveTo(Math.round(c * cellW) + 0.5, 0);
-      ctx.lineTo(Math.round(c * cellW) + 0.5, ch);
-      ctx.stroke();
-    }
-    for (var r = 0; r <= ROWS; r++) {
-      ctx.beginPath();
-      ctx.moveTo(0, Math.round(r * cellH) + 0.5);
-      ctx.lineTo(cw, Math.round(r * cellH) + 0.5);
-      ctx.stroke();
-    }
-
-    /* Land cells */
-    var pad = cellW > 4 ? 1 : 0.5;
-    for (var row = 0; row < ROWS; row++) {
-      for (var col = 0; col < COLS; col++) {
-        if (!grid[row * COLS + col]) continue;
-        var x = col * cellW + pad;
-        var y = row * cellH + pad;
-        var w = cellW - pad * 2;
-        var h = cellH - pad * 2;
-        ctx.fillStyle = '#C9A84C';
-        ctx.fillRect(x, y, w, h);
-        /* Subtle highlight on top edge */
-        ctx.fillStyle = 'rgba(255,220,120,0.35)';
-        ctx.fillRect(x, y, w, Math.max(1, h * 0.25));
-      }
-    }
-
-    /* Update hotspot button positions */
-    document.querySelectorAll('.map-hotspot').forEach(function(btn) {
-      var region = btn.dataset.region;
-      var pos = HOTSPOT_POS[region];
-      if (!pos) return;
-      var lon = pos[0], lat = pos[1];
-      var col = (lon + 180) / 360 * COLS;
-      var row = (90 - lat) / 180 * ROWS;
-      btn.style.left = Math.round(col / COLS * cw) + 'px';
-      btn.style.top  = Math.round(row / ROWS * ch) + 'px';
-    });
-  }
+function openRamiMapModal() {
+  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_map');
+  openModal('<div class="hotspot-info rami-modal-dark"><p style="font-family:var(--font-mono);font-size:0.8rem;letter-spacing:0.12em;color:#C9302C;margin-bottom:12px">COORDENADAS: -34.6533, -58.3508</p><h4 style="color:#C9302C">Refineria YPF - Sector 7</h4><p style="margin:8px 0;color:#aaa">Ultima inspeccion: <strong style="color:#fff">23/10/1991</strong></p><p style="margin:8px 0;color:#aaa">Personal desaparecido: <strong style="color:#C9302C">1</strong></p><p style="margin:8px 0;color:#888;font-style:italic">Causa oficial: "fuga menor sin victimas"</p><p style="margin-top:20px;color:#C9302C;font-family:var(--font-mono);letter-spacing:0.15em;font-size:1.1rem">LO ESTAN MINTIENDO.</p></div>', true);
+}
 
 function buildHotspotSVG(region, x, y) {
   return [
@@ -567,29 +502,41 @@ function initEasterEggs() {
 
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;';
-  var txt = document.createElement('p');
-  txt.textContent = 'I SEE YOU';
-  txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:0.2em;text-align:center;animation:shake 0.3s infinite;';
-  overlay.appendChild(txt);
-  document.body.appendChild(overlay);
-  if (window.E64.audio) window.E64.audio.playRumble();
 
-  /* Subliminal Rami at 2s */
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;opacity:0;transition:opacity 60ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+  document.body.appendChild(overlay);
+
+  /* Sonido INMEDIATO */
+  if (window.E64.audio) window.E64.audio.playScreamer(1.0);
+
+  /* Fade in */
+  requestAnimationFrame(function() { overlay.style.opacity = '1'; });
+
+  /* Paso 1 (50ms): foto de Rama a pantalla completa */
   setTimeout(function() {
     var img = document.createElement('img');
     img.src = 'assets/img/sebastiancalvino.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.2) sepia(0.3);';
     overlay.appendChild(img);
-    requestAnimationFrame(function() { img.style.opacity = '1'; });
-    if (window.E64.audio) window.E64.audio.playScreamer(0.9);
-    setTimeout(function() { img.style.opacity = '0'; }, 300);
-  }, 1800);
+  }, 50);
 
+  /* Paso 2 (700ms): "I SEE YOU" encima */
   setTimeout(function() {
-    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-  }, 4000);
+    var txt = document.createElement('p');
+    txt.textContent = 'I SEE YOU';
+    txt.style.cssText = 'position:absolute;z-index:2;color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,8vw,5rem);letter-spacing:0.2em;text-align:center;text-shadow:0 0 40px #C9302C,0 0 80px rgba(201,48,44,0.5);animation:ramiShake 0.15s linear infinite;';
+    overlay.appendChild(txt);
+  }, 700);
+
+  /* Paso 3 (3500ms): fade out */
+  setTimeout(function() {
+    overlay.style.transition = 'opacity 0.5s';
+    overlay.style.opacity = '0';
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 500);
+  }, 3500);
 }
 
 function showCursedNote() {

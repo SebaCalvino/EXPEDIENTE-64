@@ -101,7 +101,7 @@ window.E64.buildEscapeRami = function(container) {
 
     function carve(r, c) {
       grid[r][c].visited = true;
-      var dirs = [[0,-1,0,2],[1,0,1,3],[0,1,2,0],[−1,0,3,1]];
+      var dirs = [[0,-1,0,2],[1,0,1,3],[0,1,2,0],[- 1,0,3,1]];
       /* shuffle */
       dirs = [[0,-1,0,2],[1,0,1,3],[0,1,2,0],[-1,0,3,1]];
       for (var i = dirs.length - 1; i > 0; i--) {
@@ -285,30 +285,59 @@ window.E64.buildEscapeRami = function(container) {
 
   function triggerCaught() {
     alive = false;
-    if (window.E64.audio) window.E64.audio.playScreamer(1.0);
 
-    /* Screamer overlay */
+    /* Screamer overlay — Rama primero, luego I SEE YOU */
     var scr = document.createElement('div');
-    scr.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 80ms;';
+    scr.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 60ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
     document.body.appendChild(scr);
+
+    /* Sonido INMEDIATO */
+    if (window.E64.audio) {
+      window.E64.audio.playScreamer(1.2);
+    } else {
+      try {
+        var ac2 = new (window.AudioContext || window.webkitAudioContext)();
+        var o2 = ac2.createOscillator(), g2 = ac2.createGain();
+        o2.type = 'sawtooth';
+        o2.frequency.setValueAtTime(1200, ac2.currentTime);
+        o2.frequency.exponentialRampToValueAtTime(60, ac2.currentTime + 1.2);
+        g2.gain.setValueAtTime(0.5, ac2.currentTime);
+        g2.gain.exponentialRampToValueAtTime(0.001, ac2.currentTime + 1.3);
+        o2.connect(g2); g2.connect(ac2.destination);
+        o2.start(); o2.stop(ac2.currentTime + 1.4);
+      } catch(e2) {}
+    }
+
+    /* Fade in negro */
     requestAnimationFrame(function() { scr.style.opacity = '1'; });
+
+    /* Paso 1 (50ms): mostrar foto de Rama a pantalla completa */
     setTimeout(function() {
-      if (ramiImg) {
-        var img = document.createElement('img');
-        img.src = ramiImg.src;
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.2);';
-        scr.appendChild(img);
-      }
-    }, 80);
+      var img = document.createElement('img');
+      img.src = 'assets/img/sebastiancalvino.png';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.2) sepia(0.3);animation:ramiShake 0.12s linear infinite;';
+      scr.appendChild(img);
+    }, 50);
+
+    /* Paso 2 (600ms): mostrar "I SEE YOU" encima de la foto */
     setTimeout(function() {
+      var txt = document.createElement('div');
+      txt.textContent = 'I SEE YOU';
+      txt.style.cssText = 'position:absolute;z-index:2;color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(3rem,10vw,6rem);letter-spacing:0.2em;text-align:center;text-shadow:0 0 40px #C9302C,0 0 80px rgba(201,48,44,0.5);animation:ramiShake 0.15s linear infinite;';
+      scr.appendChild(txt);
+    }, 600);
+
+    /* Paso 3 (1800ms): fade out y mostrar game over */
+    setTimeout(function() {
+      scr.style.transition = 'opacity 0.4s';
       scr.style.opacity = '0';
       setTimeout(function() {
         if (scr.parentNode) scr.parentNode.removeChild(scr);
         titleEl.textContent = 'TE ATRAPÓ';
         msgEl.textContent = 'Rami Pita te encontró. Tiempo: ' + elapsed + 's';
         overlay.classList.add('show');
-      }, 300);
-    }, 1200);
+      }, 400);
+    }, 1800);
   }
 
   function triggerEscape() {

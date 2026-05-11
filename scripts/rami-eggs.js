@@ -216,16 +216,29 @@ window.E64 = window.E64 || {};
   /* ── Console egg: type "rami" globally ── */
   var consoleBuffer = '';
   document.addEventListener('keydown', function(e) {
-    // Removed check for active input to allow typing "rami" anywhere
-    if (e.key && e.key.length === 1) {
-      consoleBuffer += e.key.toLowerCase();
-      if (consoleBuffer.length > 10) consoleBuffer = consoleBuffer.slice(-10);
-      if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
-        consoleBuffer = '';
-        unlockEgg('rami_egg_console');
-        console.log('%c ██████╗  █████╗ ███╗   ███╗██╗\n██╔══██╗██╔══██╗████╗ ████║██║\n██████╔╝███████║██╔████╔██║██║\n██╔══██╗██╔══██║██║╚██╔╝██║██║\n██║  ██║██║  ██║██║ ╚═╝ ██║██║\n╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝', 'color:#C9302C;font-size:10px');
-        console.warn('Te oigo escribirme. — R.P.');
-      }
+    /* Capturar letras Y espacio para el cheat "pita completo" */
+    var ch = '';
+    if (e.key && e.key.length === 1) ch = e.key.toLowerCase();
+    else if (e.key === ' ') ch = ' ';
+
+    if (!ch) return;
+
+    consoleBuffer += ch;
+    if (consoleBuffer.length > 20) consoleBuffer = consoleBuffer.slice(-20);
+
+    /* Cheat code: "pita completo" desbloquea todos los eggs */
+    if (consoleBuffer.includes('pita completo')) {
+      consoleBuffer = '';
+      EGGS.forEach(function(egg) { unlockEgg(egg); });
+      console.log('%cCHEAT ACTIVADO: todos los eggs desbloqueados', 'color:#C9302C;font-size:14px;font-weight:bold');
+      return;
+    }
+
+    if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
+      consoleBuffer = '';
+      unlockEgg('rami_egg_console');
+      console.log('%c \u2588\u2588\u2588\u2588\u2588\u2588\u2557  \u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2557   \u2588\u2588\u2588\u2557\u2588\u2588\u2557\n\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2551\n\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2551\u2588\u2588\u2554\u2588\u2588\u2588\u2588\u2554\u2588\u2588\u2551\u2588\u2588\u2551\n\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2551\u2588\u2588\u2551\u255A\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u2588\u2588\u2551\n\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551  \u2588\u2588\u2551\u2588\u2588\u2551 \u255A\u2550\u255D \u2588\u2588\u2551\u2588\u2588\u2551\n\u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u255D  \u255A\u2550\u255D\u255A\u2550\u255D     \u255A\u2550\u255D\u255A\u2550\u255D', 'color:#C9302C;font-size:10px');
+      console.warn('Te oigo escribirme. \u2014 R.P.');
     }
   });
 
