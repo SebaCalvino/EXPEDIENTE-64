@@ -205,7 +205,7 @@ window.E64 = window.E64 || {};
         }, 200);
       }
     }, 100);
-    unlockEgg('rami_egg_idle');
+    window.E64.unlockEgg('rami_egg_idle');
     resetIdle();
   }
   ['click','keydown'].forEach(function(ev) {
@@ -220,17 +220,24 @@ window.E64 = window.E64 || {};
       consoleBuffer += e.key.toLowerCase();
       if (consoleBuffer.length > 20) consoleBuffer = consoleBuffer.slice(-20);
 
-      /* Cheat: "pita completo" → desbloquea todos los easter eggs */
+      /* Cheat: "pita completo" → desbloquea TODO + mega-unlock */
       if (consoleBuffer.includes('pita completo')) {
         consoleBuffer = '';
-        EGGS.forEach(function(egg) { unlockEgg(egg); });
+        EGGS.forEach(function(egg) { unlockedSet[egg] = true; });
+        updateRamiCard(EGGS.length);
+        revealRamiCard();
+        setTimeout(triggerMegaUnlock, 400);
         console.log('%cPITA COMPLETO — todos los registros desbloqueados.', 'color:#C9302C;font-size:12px;font-weight:bold');
         return;
       }
 
       if (consoleBuffer.includes('rami') && !isUnlocked('rami_egg_console')) {
         consoleBuffer = '';
-        unlockEgg('rami_egg_console');
+        /* Golden Freddy grito al tipear "rami" */
+        if (window.E64.audio && window.E64.audio.playScreamerSound) {
+          window.E64.audio.playScreamerSound(0.7);
+        }
+        window.E64.unlockEgg('rami_egg_console');
         console.log('%c ██████╗  █████╗ ███╗   ███╗██╗\n██╔══██╗██╔══██╗████╗ ████║██║\n██████╔╝███████║██╔████╔██║██║\n██╔══██╗██╔══██║██║╚██╔╝██║██║\n██║  ██║██║  ██║██║ ╚═╝ ██║██║\n╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝', 'color:#C9302C;font-size:10px');
         console.warn('Te oigo escribirme. — R.P.');
       }
@@ -307,8 +314,11 @@ window.E64 = window.E64 || {};
     if (window.E64._megaUnlockDone) return;
     window.E64._megaUnlockDone = true;
 
-    /* 1. Golden Freddy sound */
-    if (window.E64.audio) window.E64.audio.playScreamer(1.2);
+    /* 1. Golden Freddy sound — solo audio, sin overlay "I SEE YOU" duplicado */
+    if (window.E64.audio) {
+      if (window.E64.audio.playScreamerSound) window.E64.audio.playScreamerSound(1.2);
+      else window.E64.audio.playScreamer(1.2);
+    }
 
     /* 2. Black overlay fade in */
     var overlay = document.createElement('div');

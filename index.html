@@ -545,16 +545,25 @@
     <p>"La química no juzga: comprende. Cada átomo cuenta una historia."</p>
   </div>
 
-  <!-- Easter egg hints — styled as redacted file footnotes -->
+  <!-- Easter egg hints — pistas más visibles para los Konami nostálgicos -->
   <div id="egg-hints" style="
-    position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
+    position:fixed;bottom:14px;left:50%;transform:translateX(-50%);
     z-index:50;pointer-events:none;text-align:center;
-    font-family:'Special Elite',monospace;font-size:0.6rem;
-    color:rgba(201,48,44,0.28);letter-spacing:0.18em;
-    white-space:nowrap;line-height:1.8;
+    font-family:'Special Elite',monospace;font-size:0.72rem;
+    color:rgba(201,48,44,0.55);letter-spacing:0.22em;
+    line-height:1.8;
+    text-shadow:0 0 8px rgba(201,48,44,0.25);
+    animation:eggHintPulse 4s ease-in-out infinite;
     ">
-    <div>↑↑↓↓←→←→BA · &nbsp; · &nbsp;RAMI</div>
+    <div>▸ ↑ ↑ ↓ ↓ ← → ← → B A ◂</div>
+    <div style="font-size:0.6rem;color:rgba(201,48,44,0.4);margin-top:4px;letter-spacing:0.35em">TIPEÁ SU NOMBRE · ESCUCHÁ LO QUE NO SE DICE</div>
   </div>
+  <style>
+    @keyframes eggHintPulse {
+      0%, 100% { opacity: 0.85; }
+      50%      { opacity: 0.45; }
+    }
+  </style>
 
   <!-- Scripts en orden de dependencias (sin módulos ES6) -->
   <script src="scripts/audio.js"></script>

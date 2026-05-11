@@ -190,11 +190,9 @@ window.E64 = window.E64 || {};
     }, 2200);
   }
 
-  function playScreamer(intensity) {
+  function playScreamerSound(intensity) {
     if (muted) return;
     intensity = intensity || 1;
-
-    /* Golden Freddy MP3 — play immediately, stop after 4 seconds */
     if (screamerAudio) {
       try {
         screamerAudio.pause();
@@ -209,7 +207,11 @@ window.E64 = window.E64 || {};
         }, 4000);
       } catch(e) {}
     }
+  }
 
+  function playScreamer(intensity) {
+    if (muted) return;
+    playScreamerSound(intensity);
     /* "I SEE YOU" text overlay — 3 seconds, black bg, no image */
     showISeeYou();
   }
@@ -332,6 +334,7 @@ window.E64 = window.E64 || {};
   window.E64.audio = {
     unlock:          unlockOnGesture,
     playScreamer:    playScreamer,
+    playScreamerSound: playScreamerSound,
     playClick:       playClick,
     playUnlock:      playUnlock,
     playStamp:       playStamp,

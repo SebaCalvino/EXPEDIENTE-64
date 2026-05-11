@@ -533,29 +533,38 @@ function initEasterEggs() {
 
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
+
+  /* Golden Freddy sound — INMEDIATO, sin overlay de I SEE YOU duplicado */
+  if (window.E64.audio && window.E64.audio.playScreamerSound) {
+    window.E64.audio.playScreamerSound(1.0);
+  } else if (window.E64.audio) {
+    window.E64.audio.playScreamer(1.0);
+  }
+
+  /* Overlay fullscreen: Rami como fondo + "I SEE YOU" arriba */
   var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99990;background:#000;display:flex;align-items:center;justify-content:center;flex-direction:column;';
-  var txt = document.createElement('p');
-  txt.textContent = 'I SEE YOU';
-  txt.style.cssText = 'color:#C9302C;font-family:"Special Elite",serif;font-size:clamp(2rem,6vw,4rem);letter-spacing:0.2em;text-align:center;animation:shake 0.3s infinite;';
-  overlay.appendChild(txt);
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 60ms;';
   document.body.appendChild(overlay);
-  if (window.E64.audio) window.E64.audio.playRumble();
 
-  /* Subliminal Rami at 2s */
-  setTimeout(function() {
-    var img = document.createElement('img');
-    img.src = 'assets/img/ramiropita.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);opacity:0;transition:opacity 40ms;';
-    overlay.appendChild(img);
-    requestAnimationFrame(function() { img.style.opacity = '1'; });
-    if (window.E64.audio) window.E64.audio.playScreamer(0.9);
-    setTimeout(function() { img.style.opacity = '0'; }, 300);
-  }, 1800);
+  var img = document.createElement('img');
+  img.src = 'assets/img/ramiropita.png';
+  img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.25) brightness(0.85);';
+  overlay.appendChild(img);
+
+  var txt = document.createElement('div');
+  txt.textContent = 'I SEE YOU';
+  txt.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"Special Elite",monospace;font-size:clamp(3rem,11vw,9rem);letter-spacing:0.25em;color:#C9302C;text-shadow:0 0 50px #000,0 0 100px #000;text-align:center;';
+  overlay.appendChild(txt);
+
+  requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
   setTimeout(function() {
-    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-  }, 4000);
+    overlay.style.transition = 'opacity 0.6s';
+    overlay.style.opacity = '0';
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 700);
+  }, 2800);
 }
 
 function showCursedNote() {
