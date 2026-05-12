@@ -23,42 +23,25 @@ window.E64.buildQuiz = function(container) {
     setTimeout(function(){current++;if(current>=QS.length)showResult();else renderQuestion();},1800);
   }
   function showQuizScreamer(onDone) {
-    /* Overlay fullscreen: goldenRami + "I SEE YOU" enorme con parpadeo caótico, ~3s */
     var ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 40ms;pointer-events:none;overflow:hidden;';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;pointer-events:none;';
     document.body.appendChild(ov);
 
     var img = document.createElement('img');
-    img.src = 'assets/img/goldenRami.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.5) saturate(0.25) brightness(0.85);';
+    img.src = 'assets/img/goldenRamiFrente.png';
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
     ov.appendChild(img);
-
-    var txt = document.createElement('div');
-    txt.textContent = 'I SEE YOU';
-    txt.style.cssText = 'position:relative;font-family:"Special Elite",monospace;font-size:clamp(5rem,18vw,15rem);letter-spacing:0.18em;color:#C9302C;text-shadow:0 0 80px #000,0 0 140px #000,0 0 30px #C9302C;text-align:center;line-height:1;will-change:opacity,transform;';
-    ov.appendChild(txt);
 
     if (window.E64.audio && window.E64.audio.playScreamerSound) window.E64.audio.playScreamerSound(0.9);
 
-    var blinkFrames = [1, 0, 1, 0.7, 0, 1, 0, 0.4, 1, 1, 0, 0.85, 0, 1, 0, 1, 0.5, 0, 1];
-    var fIdx = 0;
-    var blinkIv = setInterval(function() {
-      txt.style.opacity = blinkFrames[fIdx % blinkFrames.length];
-      var dx = (Math.random() - 0.5) * 6;
-      var dy = (Math.random() - 0.5) * 6;
-      txt.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-      fIdx++;
-    }, 55);
-
     requestAnimationFrame(function() { ov.style.opacity = '1'; });
     setTimeout(function() {
-      clearInterval(blinkIv);
       ov.style.transition = 'opacity 0.6s';
       ov.style.opacity = '0';
       setTimeout(function() {
         if (ov.parentNode) ov.parentNode.removeChild(ov);
         onDone();
-      }, 700);
+      }, 600);
     }, 2400);
   }
 
