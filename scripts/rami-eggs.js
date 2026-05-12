@@ -331,52 +331,62 @@ window.E64 = window.E64 || {};
     if (window.E64._megaUnlockDone) return;
     window.E64._megaUnlockDone = true;
 
-    /* 1. Golden Freddy sound — solo audio, sin overlay "I SEE YOU" duplicado */
-    if (window.E64.audio) {
-      if (window.E64.audio.playScreamerSound) window.E64.audio.playScreamerSound(1.2);
-      else window.E64.audio.playScreamer(1.2);
+    /* 1. Audio */
+    if (window.E64.audio && window.E64.audio.playScreamerSound) {
+      window.E64.audio.playScreamerSound(1.2);
     }
 
-    /* 2. Black overlay fade in */
+    /* 2. Black outer overlay fades in (0.4s) */
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.6s;overflow:hidden;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.4s;overflow:hidden;';
     document.body.appendChild(overlay);
     requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
-    /* 3. Dark photo fade in with low brightness */
+    /* 3. Photo + text appear at t=400ms */
     setTimeout(function() {
       var img = document.createElement('img');
       img.src = 'assets/img/goldenRamiFrente.jpg';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;filter:brightness(0.25) contrast(1.4);opacity:0;transition:opacity 2s;';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;filter:brightness(0.55) contrast(1.4);opacity:0;transition:opacity 1.2s;';
       overlay.appendChild(img);
       requestAnimationFrame(function() {
         requestAnimationFrame(function() { img.style.opacity = '1'; });
       });
 
-      /* Minimal text — bottom center, subtle */
       var txt = document.createElement('div');
-      txt.style.cssText = 'position:absolute;bottom:12vh;left:0;right:0;text-align:center;font-family:"Special Elite",serif;font-size:clamp(0.9rem,2.5vw,1.4rem);color:rgba(201,48,44,0.75);letter-spacing:0.4em;text-transform:uppercase;opacity:0;transition:opacity 1.2s 1s;';
+      txt.style.cssText = 'position:absolute;bottom:12vh;left:0;right:0;text-align:center;font-family:"Special Elite",serif;font-size:clamp(0.9rem,2.5vw,1.4rem);color:rgba(201,48,44,0.85);letter-spacing:0.4em;text-transform:uppercase;opacity:0;transition:opacity 1s 0.8s;';
       txt.textContent = 'EXPEDIENTE COMPLETO';
       overlay.appendChild(txt);
       requestAnimationFrame(function() {
         requestAnimationFrame(function() { txt.style.opacity = '1'; });
       });
-    }, 500);
 
-    /* 4. Long fade out at 5s */
+      /* 4. Inner veil fades IN at t=2s over 1.5s (darkens image) */
+      var veil = document.createElement('div');
+      veil.style.cssText = 'position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;';
+      overlay.appendChild(veil);
+      setTimeout(function() {
+        veil.style.opacity = '1';
+        /* 5. Veil fades OUT at t=3.5s over 1.5s (reveals image again) */
+        setTimeout(function() {
+          veil.style.opacity = '0';
+        }, 1500);
+      }, 1600);
+
+    }, 400);
+
+    /* 6. Outer overlay fades out at t=7s */
     setTimeout(function() {
-      overlay.style.transition = 'opacity 2.5s';
+      overlay.style.transition = 'opacity 1.2s';
       overlay.style.opacity = '0';
       setTimeout(function() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-        /* Reveal Rami card and scroll to it */
         if (window.E64.revealRamiCard) window.E64.revealRamiCard();
         var btn = document.getElementById('rami-unlock-btn');
         if (btn) { btn.style.display = 'block'; btn.style.animation = 'blink 0.8s step-end infinite'; }
         var ramiCard = document.querySelector('.agent-card[data-agent="rami"]');
         if (ramiCard) ramiCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 2600);
-    }, 5000);
+      }, 1300);
+    }, 7000);
   }
 
 })();

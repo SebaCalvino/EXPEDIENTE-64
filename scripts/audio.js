@@ -349,6 +349,7 @@ window.E64 = window.E64 || {};
     playScreamer:    playScreamer,
     playScreamerSound: playScreamerSound,
     playGoldenSound: playGoldenSound,
+    showISeeYou:     showISeeYou,
     playClick:       playClick,
     playUnlock:      playUnlock,
     playStamp:       playStamp,
