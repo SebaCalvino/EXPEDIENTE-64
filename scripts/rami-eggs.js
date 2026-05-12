@@ -193,8 +193,8 @@ window.E64 = window.E64 || {};
       /* Show Rami for 0.2s */
       if (document.querySelector('img[src*="ramapita"]') || true) {
         var img = document.createElement('img');
-        img.src = 'assets/img/goldenRama1.png';
-        img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:99998;pointer-events:none;filter:contrast(1.4) saturate(0.3) hue-rotate(-10deg);';
+        img.src = 'assets/img/goldenRamiFrente.png';
+        img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:99998;pointer-events:none;filter:contrast(1.3) brightness(0.9);';
         document.body.appendChild(img);
         setTimeout(function() {
           flash.style.opacity = '0';
@@ -346,8 +346,8 @@ window.E64 = window.E64 || {};
     /* 3. Dark photo fade in with low brightness */
     setTimeout(function() {
       var img = document.createElement('img');
-      img.src = 'assets/img/goldenRami.png';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.2) contrast(1.5) saturate(0.2);opacity:0;transition:opacity 2s;';
+      img.src = 'assets/img/goldenRamiFrente.png';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;filter:brightness(0.25) contrast(1.4);opacity:0;transition:opacity 2s;';
       overlay.appendChild(img);
       requestAnimationFrame(function() {
         requestAnimationFrame(function() { img.style.opacity = '1'; });

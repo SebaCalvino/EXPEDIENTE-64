@@ -137,35 +137,19 @@ window.E64.buildSulfusnake = function(container) {
     }
     playHumanScream();
 
-    /* 3. Overlay fullscreen: goldenRami + "I SEE YOU" enorme con parpadeo caótico */
+    /* 3. Overlay fullscreen: goldenRamiFrente estático, sin texto */
     var overlay2 = document.createElement('div');
-    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;display:flex;align-items:center;justify-content:center;overflow:hidden;';
+    overlay2.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;';
     document.body.appendChild(overlay2);
 
-    var img = document.createElement('img');
-    img.src = 'assets/img/goldenRami.png';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(1.6) saturate(0.2) brightness(0.9);';
-    overlay2.appendChild(img);
-
-    var txt = document.createElement('div');
-    txt.textContent = 'I SEE YOU';
-    txt.style.cssText = 'position:relative;font-family:"Special Elite",monospace;font-size:clamp(5rem,18vw,15rem);letter-spacing:0.18em;color:#C9302C;text-shadow:0 0 80px #000,0 0 140px #000,0 0 30px #C9302C;text-align:center;line-height:1;will-change:opacity,transform;';
-    overlay2.appendChild(txt);
-
-    var blinkFrames = [1, 0, 1, 0.7, 0, 1, 0, 0.4, 1, 1, 0, 0.85, 0, 1, 0, 1, 0.5, 0, 1];
-    var fIdx = 0;
-    var blinkIv = setInterval(function() {
-      txt.style.opacity = blinkFrames[fIdx % blinkFrames.length];
-      var dx = (Math.random() - 0.5) * 6;
-      var dy = (Math.random() - 0.5) * 6;
-      txt.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-      fIdx++;
-    }, 55);
+    var img2 = document.createElement('img');
+    img2.src = 'assets/img/goldenRamiFrente.png';
+    img2.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
+    overlay2.appendChild(img2);
 
     requestAnimationFrame(function() { overlay2.style.opacity = '1'; });
 
     setTimeout(function() {
-      clearInterval(blinkIv);
       overlay2.style.transition = 'opacity 0.6s';
       overlay2.style.opacity = '0';
       setTimeout(function() {
@@ -175,7 +159,7 @@ window.E64.buildSulfusnake = function(container) {
           'GAME OVER',
           true
         );
-      }, 700);
+      }, 600);
     }, 2400);
   }
 
