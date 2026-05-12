@@ -571,7 +571,7 @@ function initEasterEggs() {
 }
 
 function showRamiKonami() {
-  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
+  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami', true);
 
   if (window.E64.audio && window.E64.audio.playGoldenSound) {
     window.E64.audio.playGoldenSound(1.0);
@@ -589,13 +589,14 @@ function showRamiKonami() {
 
   requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
+  var holdGolden = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
   setTimeout(function() {
     overlay.style.transition = 'opacity 0.6s';
     overlay.style.opacity = '0';
     setTimeout(function() {
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     }, 700);
-  }, 2800);
+  }, holdGolden);
 }
 
 function showCursedNote() {
@@ -654,7 +655,7 @@ function triggerTimeline1991Egg(polaroid) {
 
 
 function triggerVotingEgg() {
-  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_voting');
+  if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_voting', true);
   var msg = document.createElement('div');
   msg.style.cssText = 'position:fixed;inset:0;z-index:99989;background:#000;display:flex;align-items:center;justify-content:center;';
   var txt = document.createElement('p');
@@ -663,5 +664,6 @@ function triggerVotingEgg() {
   msg.appendChild(txt);
   document.body.appendChild(msg);
   if (window.E64.audio) window.E64.audio.playScreamer(0.7);
-  setTimeout(function() { if (msg.parentNode) msg.parentNode.removeChild(msg); }, 2500);
+  var holdGolden = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
+  setTimeout(function() { if (msg.parentNode) msg.parentNode.removeChild(msg); }, holdGolden + 800);
 }

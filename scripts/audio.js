@@ -1,5 +1,7 @@
 /* audio.js — Ambient + sound effects via WebAudio (no external files needed) */
 window.E64 = window.E64 || {};
+/* Tiempo que la cara golden permanece a pantalla completa antes del fade (ms) */
+window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
 
 (function() {
 
@@ -143,10 +145,16 @@ window.E64 = window.E64 || {};
   }
 
   /* ──────────────────────────────────────────
-     SCREAMER — Golden Freddy MP3 + Golden Sound MP4
+     SCREAMER — screamer.mp3 (genérico) + GoldenSound.mp4 (goldenRamiFrente)
   ────────────────────────────────────────── */
   var screamerAudio = null;
   var goldenAudio = null;
+  var goldenStopTimer = null;
+  var screamerJumpscareHandT = null;
+  var screamerJumpscareTextT = null;
+  var screamerJumpscareDeadlineT = null;
+  var screamerJumpscareSafety = null;
+  var screamerJumpscareRoot = null;
   (function() {
     try {
       screamerAudio = new Audio('assets/audio/screamer.mp3');
@@ -157,6 +165,131 @@ window.E64 = window.E64 || {};
       goldenAudio.preload = 'auto';
     } catch(e) {}
   })();
+
+  function tearDownScreamerJumpscare() {
+    if (screamerJumpscareHandT) {
+      clearTimeout(screamerJumpscareHandT);
+      screamerJumpscareHandT = null;
+    }
+    if (screamerJumpscareTextT) {
+      clearTimeout(screamerJumpscareTextT);
+      screamerJumpscareTextT = null;
+    }
+    if (screamerJumpscareDeadlineT) {
+      clearTimeout(screamerJumpscareDeadlineT);
+      screamerJumpscareDeadlineT = null;
+    }
+    if (screamerJumpscareSafety) {
+      clearTimeout(screamerJumpscareSafety);
+      screamerJumpscareSafety = null;
+    }
+    if (screamerJumpscareRoot && screamerJumpscareRoot.parentNode) {
+      screamerJumpscareRoot.parentNode.removeChild(screamerJumpscareRoot);
+      screamerJumpscareRoot = null;
+    }
+  }
+
+  /* Overlay screamer.mp3: ~5 s máximo, una imagen manos (~1 s por aparición, ritmo variable), un solo "I SEE YOU" que salta sin acumular capas. */
+  var SCREAMER_JUMPSCARE_MS = 5000;
+
+  function startScreamerJumpscareVisual() {
+    tearDownScreamerJumpscare();
+
+    var stale = document.getElementById('e64-screamer-jumpscare');
+    if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
+
+    var root = document.createElement('div');
+    root.id = 'e64-screamer-jumpscare';
+    root.setAttribute('aria-hidden', 'true');
+    root.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'z-index:100000',
+      'pointer-events:none',
+      'overflow:hidden',
+      'background:#000'
+    ].join(';');
+    document.body.appendChild(root);
+    screamerJumpscareRoot = root;
+
+    var imgWrap = document.createElement('div');
+    imgWrap.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;';
+    var hands = document.createElement('img');
+    hands.src = 'assets/img/GoldenRamiManos.png';
+    hands.alt = '';
+    hands.draggable = false;
+    hands.style.cssText = [
+      'width:min(92vw,92vh)',
+      'height:min(92vw,92vh)',
+      'object-fit:contain',
+      'filter:contrast(1.2) brightness(0.88)',
+      'opacity:0',
+      'transition:opacity 0.08s linear',
+      'pointer-events:none'
+    ].join(';');
+    imgWrap.appendChild(hands);
+    root.appendChild(imgWrap);
+
+    var isee = document.createElement('div');
+    isee.textContent = 'I SEE YOU';
+    isee.style.cssText = [
+      'position:absolute',
+      'left:10%',
+      'top:12%',
+      'font-family:Impact,Haettenschweiler,sans-serif',
+      'font-weight:900',
+      'font-size:clamp(1.1rem,4.2vw,2.6rem)',
+      'letter-spacing:0.14em',
+      'color:rgba(210,45,45,0.92)',
+      'text-shadow:0 0 8px #000,0 0 22px rgba(201,48,44,0.75)',
+      'white-space:nowrap',
+      'opacity:0',
+      'transition:opacity 0.06s linear',
+      'pointer-events:none',
+      'max-width:90vw'
+    ].join(';');
+    root.appendChild(isee);
+
+    function isJumpscareLive() {
+      return !!screamerJumpscareRoot && screamerJumpscareRoot === root && document.body.contains(root);
+    }
+
+    function handsPulse() {
+      if (!isJumpscareLive()) return;
+      var onMs = 850 + Math.floor(Math.random() * 320);
+      var gapBefore = 120 + Math.floor(Math.random() * 520);
+      screamerJumpscareHandT = setTimeout(function() {
+        if (!isJumpscareLive()) return;
+        hands.style.opacity = '1';
+        screamerJumpscareHandT = setTimeout(function() {
+          if (!isJumpscareLive()) return;
+          hands.style.opacity = '0';
+          screamerJumpscareHandT = setTimeout(handsPulse, 80 + Math.floor(Math.random() * 380));
+        }, onMs);
+      }, gapBefore);
+    }
+
+    function textFlash() {
+      if (!isJumpscareLive()) return;
+      var gap = 100 + Math.floor(Math.random() * 420);
+      screamerJumpscareTextT = setTimeout(function() {
+        if (!isJumpscareLive()) return;
+        isee.style.left = (4 + Math.random() * 72) + '%';
+        isee.style.top = (6 + Math.random() * 68) + '%';
+        isee.style.transform = 'rotate(' + (Math.random() * 20 - 10) + 'deg)';
+        isee.style.opacity = '1';
+        var flashMs = 140 + Math.floor(Math.random() * 220);
+        screamerJumpscareTextT = setTimeout(function() {
+          if (!isJumpscareLive()) return;
+          isee.style.opacity = '0';
+          screamerJumpscareTextT = setTimeout(textFlash, 60 + Math.floor(Math.random() * 280));
+        }, flashMs);
+      }, gap);
+    }
+
+    handsPulse();
+    textFlash();
+  }
 
   function showISeeYou() {
     var old = document.getElementById('e64-isee-overlay');
@@ -174,58 +307,173 @@ window.E64 = window.E64 || {};
 
     requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
+    var holdMs = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
     setTimeout(function() {
       overlay.style.transition = 'opacity 0.5s';
       overlay.style.opacity = '0';
       setTimeout(function() {
         if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
       }, 600);
-    }, 2400);
+    }, holdMs);
   }
 
-  function playScreamerSound(intensity) {
-    if (muted) return;
+  function playScreamerSound(intensity, onEnded) {
+    var doneOnce = false;
+    function fireDoneOnce() {
+      if (doneOnce) return;
+      doneOnce = true;
+      if (typeof onEnded === 'function') {
+        try { onEnded(); } catch(cbErr) {}
+      }
+    }
+
+    if (muted) {
+      fireDoneOnce();
+      return;
+    }
     intensity = intensity || 1;
-    if (screamerAudio) {
-      try {
-        screamerAudio.pause();
-        screamerAudio.currentTime = 0;
-        screamerAudio.volume = Math.min(1, 0.9 * intensity);
-        screamerAudio.play().catch(function() {});
-        setTimeout(function() {
-          if (screamerAudio && !screamerAudio.paused) {
+    if (!screamerAudio) {
+      fireDoneOnce();
+      return;
+    }
+    try {
+      screamerAudio.onended = null;
+      screamerAudio.pause();
+      screamerAudio.currentTime = 0;
+      screamerAudio.volume = Math.min(1, 0.9 * intensity);
+
+      startScreamerJumpscareVisual();
+
+      screamerJumpscareDeadlineT = setTimeout(function() {
+        screamerJumpscareDeadlineT = null;
+        screamerAudio.onended = null;
+        if (screamerJumpscareSafety) {
+          clearTimeout(screamerJumpscareSafety);
+          screamerJumpscareSafety = null;
+        }
+        tearDownScreamerJumpscare();
+        try {
+          screamerAudio.pause();
+          screamerAudio.currentTime = 0;
+        } catch(ed) {}
+        fireDoneOnce();
+      }, SCREAMER_JUMPSCARE_MS);
+
+      screamerAudio.onended = function() {
+        screamerAudio.onended = null;
+        if (screamerJumpscareDeadlineT) {
+          clearTimeout(screamerJumpscareDeadlineT);
+          screamerJumpscareDeadlineT = null;
+        }
+        if (screamerJumpscareSafety) {
+          clearTimeout(screamerJumpscareSafety);
+          screamerJumpscareSafety = null;
+        }
+        tearDownScreamerJumpscare();
+        try {
+          screamerAudio.pause();
+          screamerAudio.currentTime = 0;
+        } catch(e2) {}
+        fireDoneOnce();
+      };
+
+      screamerJumpscareSafety = setTimeout(function() {
+        screamerJumpscareSafety = null;
+        screamerAudio.onended = null;
+        if (screamerJumpscareDeadlineT) {
+          clearTimeout(screamerJumpscareDeadlineT);
+          screamerJumpscareDeadlineT = null;
+        }
+        if (screamerAudio && !screamerAudio.ended) {
+          try {
             screamerAudio.pause();
             screamerAudio.currentTime = 0;
-          }
-        }, 4000);
-      } catch(e) {}
+          } catch(e3) {}
+        }
+        tearDownScreamerJumpscare();
+        fireDoneOnce();
+      }, 45000);
+
+      screamerAudio.play().catch(function() {
+        screamerAudio.onended = null;
+        if (screamerJumpscareDeadlineT) {
+          clearTimeout(screamerJumpscareDeadlineT);
+          screamerJumpscareDeadlineT = null;
+        }
+        if (screamerJumpscareSafety) {
+          clearTimeout(screamerJumpscareSafety);
+          screamerJumpscareSafety = null;
+        }
+        tearDownScreamerJumpscare();
+        fireDoneOnce();
+      });
+    } catch(e) {
+      tearDownScreamerJumpscare();
+      fireDoneOnce();
     }
   }
 
-  /* Golden Sound — para konami, rami input, y captura en escape-rami */
-  function playGoldenSound(intensity) {
+  /* Golden Sound (mp4) — dura lo mismo que el overlay golden (por defecto GOLDEN_SCREAMER_HOLD_MS + fade). */
+  function playGoldenSound(intensity, durationMs) {
     if (muted) return;
     intensity = intensity || 1;
-    if (goldenAudio) {
+    if (!goldenAudio) return;
+    if (goldenStopTimer) {
+      clearTimeout(goldenStopTimer);
+      goldenStopTimer = null;
+    }
+    goldenAudio.onended = null;
+    goldenAudio.loop = false;
+
+    var ms;
+    if (typeof durationMs === 'number' && durationMs > 0) {
+      ms = durationMs;
+    } else if (durationMs === false) {
       try {
         goldenAudio.pause();
         goldenAudio.currentTime = 0;
         goldenAudio.volume = Math.min(1, 0.95 * intensity);
-        goldenAudio.play().catch(function() {});
-        setTimeout(function() {
-          if (goldenAudio && !goldenAudio.paused) {
+        goldenAudio.onended = function() {
+          goldenAudio.onended = null;
+          try {
             goldenAudio.pause();
             goldenAudio.currentTime = 0;
-          }
-        }, 4000);
+          } catch(e2) {}
+        };
+        goldenAudio.play().catch(function() { goldenAudio.onended = null; });
       } catch(e) {}
+      return;
+    } else {
+      var hold = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
+      ms = hold + 800;
     }
+
+    try {
+      goldenAudio.pause();
+      goldenAudio.currentTime = 0;
+      goldenAudio.loop = true;
+      goldenAudio.volume = Math.min(1, 0.95 * intensity);
+      goldenAudio.play().catch(function() {
+        if (goldenStopTimer) {
+          clearTimeout(goldenStopTimer);
+          goldenStopTimer = null;
+        }
+      });
+      goldenStopTimer = setTimeout(function() {
+        goldenStopTimer = null;
+        goldenAudio.loop = false;
+        try {
+          goldenAudio.pause();
+          goldenAudio.currentTime = 0;
+        } catch(e3) {}
+      }, ms);
+    } catch(e) {}
   }
 
   function playScreamer(intensity) {
     if (muted) return;
-    playScreamerSound(intensity);
-    /* "I SEE YOU" text overlay — 3 seconds, black bg, no image */
+    /* Overlay usa goldenRamiFrente — mismo audio que el resto de screamers golden */
+    playGoldenSound(intensity);
     showISeeYou();
   }
 

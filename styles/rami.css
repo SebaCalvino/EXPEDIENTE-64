@@ -371,3 +371,16 @@ body::after {
   color: rgba(201,48,44,0.3);
   font-family: 'Special Elite', serif;
 }
+.photo-placeholder.rami-evidence-photo {
+  padding: 0;
+  overflow: hidden;
+  max-width: 560px;
+}
+.photo-placeholder.rami-evidence-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  filter: brightness(0.28) contrast(1.12);
+}

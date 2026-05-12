@@ -27,16 +27,16 @@ window.E64 = window.E64 || {};
     return !!unlockedSet[egg];
   }
 
-  function unlockEgg(egg) {
+  function unlockEgg(egg, silentNotifSounds) {
     if (isUnlocked(egg)) return;
     unlockedSet[egg] = true;
     var n = countUnlocked();
-    showEggNotification(n);
+    showEggNotification(n, !!silentNotifSounds);
     updateRamiCard(n);
     if (n >= EGGS.length) revealRamiCard();
   }
 
-  function showEggNotification(n) {
+  function showEggNotification(n, silentNotifSounds) {
     var existing = document.getElementById('rami-egg-notif');
     if (existing) existing.parentNode.removeChild(existing);
 
@@ -68,12 +68,14 @@ window.E64 = window.E64 || {};
                    '<div style="font-size:0.7em;color:#666;letter-spacing:0.2em">REGISTROS DESBLOQUEADOS</div>';
     document.body.appendChild(el);
 
-    /* Glitch + unlock sound */
-    if (window.E64.audio) {
-      window.E64.audio.playGlitch();
-      setTimeout(function() { window.E64.audio.playUnlock(); }, 80);
-    } else {
-      playGlitch();
+    /* Glitch + unlock sound (omitir si ya suena GoldenSound u otro screamer) */
+    if (!silentNotifSounds) {
+      if (window.E64.audio) {
+        window.E64.audio.playGlitch();
+        setTimeout(function() { window.E64.audio.playUnlock(); }, 80);
+      } else {
+        playGlitch();
+      }
     }
 
     requestAnimationFrame(function() {
@@ -185,8 +187,8 @@ window.E64 = window.E64 || {};
     var flash = document.createElement('div');
     flash.style.cssText = 'position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:0;background:#000;transition:opacity 100ms;';
     document.body.appendChild(flash);
-    if (window.E64.audio && window.E64.audio.playScreamer) {
-      window.E64.audio.playScreamer(0.4);
+    if (window.E64.audio && window.E64.audio.playGoldenSound) {
+      window.E64.audio.playGoldenSound(0.4, 2200);
     }
     requestAnimationFrame(function() { flash.style.opacity = '1'; });
     setTimeout(function() {
@@ -205,7 +207,7 @@ window.E64 = window.E64 || {};
         }, 200);
       }
     }, 100);
-    window.E64.unlockEgg('rami_egg_idle');
+    window.E64.unlockEgg('rami_egg_idle', true);
     resetIdle();
   }
   ['click','keydown'].forEach(function(ev) {
@@ -254,9 +256,9 @@ window.E64 = window.E64 || {};
         if (isUnlocked('rami_egg_console')) return;
         consoleBuffer = '';
         if (window.E64.audio && window.E64.audio.playGoldenSound) {
-          window.E64.audio.playGoldenSound(0.9);
+          window.E64.audio.playGoldenSound(0.9, 5200);
         }
-        window.E64.unlockEgg('rami_egg_console');
+        window.E64.unlockEgg('rami_egg_console', true);
       }, 700);
     }
   });
@@ -276,9 +278,9 @@ window.E64 = window.E64 || {};
   };
 
   var _origUnlockEgg = window.E64.unlockEgg;
-  window.E64.unlockEgg = function(egg) {
+  window.E64.unlockEgg = function(egg, silentNotifSounds) {
     var wasUnlocked = isUnlocked(egg);
-    _origUnlockEgg(egg);
+    _origUnlockEgg(egg, silentNotifSounds);
     if (!wasUnlocked && EGG_HINTS[egg]) {
       setTimeout(function() {
         showCrossHint(EGG_HINTS[egg]);
@@ -331,18 +333,15 @@ window.E64 = window.E64 || {};
     if (window.E64._megaUnlockDone) return;
     window.E64._megaUnlockDone = true;
 
-    /* 1. Audio */
     if (window.E64.audio && window.E64.audio.playScreamerSound) {
       window.E64.audio.playScreamerSound(1.2);
     }
 
-    /* 2. Black outer overlay fades in (0.4s) */
     var overlay = document.createElement('div');
     overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.4s;overflow:hidden;';
     document.body.appendChild(overlay);
     requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
-    /* 3. Photo + text appear at t=400ms */
     setTimeout(function() {
       var img = document.createElement('img');
       img.src = 'assets/img/goldenRamiFrente.jpg';
@@ -360,21 +359,18 @@ window.E64 = window.E64 || {};
         requestAnimationFrame(function() { txt.style.opacity = '1'; });
       });
 
-      /* 4. Inner veil fades IN at t=2s over 1.5s (darkens image) */
+      /* Veil fades IN over image at t=2s, then OUT — 3s total pulse */
       var veil = document.createElement('div');
       veil.style.cssText = 'position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;';
       overlay.appendChild(veil);
       setTimeout(function() {
         veil.style.opacity = '1';
-        /* 5. Veil fades OUT at t=3.5s over 1.5s (reveals image again) */
-        setTimeout(function() {
-          veil.style.opacity = '0';
-        }, 1500);
+        setTimeout(function() { veil.style.opacity = '0'; }, 1500);
       }, 1600);
 
     }, 400);
 
-    /* 6. Outer overlay fades out at t=7s */
+    /* Outer overlay fades out at t=7s */
     setTimeout(function() {
       overlay.style.transition = 'opacity 1.2s';
       overlay.style.opacity = '0';

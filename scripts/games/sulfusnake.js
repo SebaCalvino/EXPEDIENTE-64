@@ -129,13 +129,12 @@ window.E64.buildSulfusnake = function(container) {
     alive = false;
 
     /* 1. Unlock easter egg */
-    if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake');
+    if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake', true);
 
     /* 2. GoldenSound audio INMEDIATO */
     if (window.E64.audio && window.E64.audio.playGoldenSound) {
       window.E64.audio.playGoldenSound(1.2);
     }
-    playHumanScream();
 
     /* 3. Overlay fullscreen: goldenRamiFrente estático, sin texto */
     var overlay2 = document.createElement('div');
@@ -149,6 +148,7 @@ window.E64.buildSulfusnake = function(container) {
 
     requestAnimationFrame(function() { overlay2.style.opacity = '1'; });
 
+    var holdGolden = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
     setTimeout(function() {
       overlay2.style.transition = 'opacity 0.6s';
       overlay2.style.opacity = '0';
@@ -160,69 +160,7 @@ window.E64.buildSulfusnake = function(container) {
           true
         );
       }, 600);
-    }, 2400);
-  }
-
-  /* Grito humano terrorífico sintetizado */
-  function playHumanScream() {
-    var ctx2 = getAudio();
-    if (!ctx2) return;
-    try {
-      var now = ctx2.currentTime;
-
-      /* Capa 1: grito agudo con vibrato (simula voz humana aterrorizada) */
-      var v1 = ctx2.createOscillator();
-      var v1g = ctx2.createGain();
-      v1.type = 'sawtooth';
-      v1.frequency.setValueAtTime(600, now);
-      v1.frequency.exponentialRampToValueAtTime(900, now + 0.1);
-      v1.frequency.exponentialRampToValueAtTime(500, now + 0.4);
-      v1.frequency.exponentialRampToValueAtTime(750, now + 0.7);
-      v1.frequency.exponentialRampToValueAtTime(300, now + 1.2);
-      /* Vibrato */
-      var vibLfo = ctx2.createOscillator();
-      var vibG = ctx2.createGain();
-      vibLfo.frequency.value = 8;
-      vibG.gain.value = 30;
-      vibLfo.connect(vibG); vibG.connect(v1.frequency);
-      vibLfo.start(now); vibLfo.stop(now + 1.3);
-      /* Formant filter (boca abierta) */
-      var f1 = ctx2.createBiquadFilter();
-      f1.type = 'bandpass'; f1.frequency.value = 800; f1.Q.value = 3;
-      v1g.gain.setValueAtTime(0.0001, now);
-      v1g.gain.exponentialRampToValueAtTime(0.6, now + 0.05);
-      v1g.gain.exponentialRampToValueAtTime(0.4, now + 0.8);
-      v1g.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
-      v1.connect(f1); f1.connect(v1g); v1g.connect(ctx2.destination);
-      v1.start(now); v1.stop(now + 1.4);
-
-      /* Capa 2: ruido de garganta (consonantes del grito) */
-      var bufLen = ctx2.sampleRate * 1.0;
-      var buf = ctx2.createBuffer(1, bufLen, ctx2.sampleRate);
-      var data = buf.getChannelData(0);
-      for (var i = 0; i < bufLen; i++) {
-        var env = i < bufLen * 0.05 ? i / (bufLen * 0.05) : Math.exp(-3 * (i / bufLen - 0.05));
-        data[i] = (Math.random() * 2 - 1) * env * 0.5;
-      }
-      var ns = ctx2.createBufferSource(); ns.buffer = buf;
-      var nf = ctx2.createBiquadFilter(); nf.type = 'bandpass'; nf.frequency.value = 2000; nf.Q.value = 2;
-      var ng = ctx2.createGain(); ng.gain.value = 0.35;
-      ns.connect(nf); nf.connect(ng); ng.connect(ctx2.destination);
-      ns.start(now);
-
-      /* Capa 3: sub-golpe de impacto */
-      var sub = ctx2.createOscillator();
-      var subG = ctx2.createGain();
-      sub.type = 'sine';
-      sub.frequency.setValueAtTime(120, now);
-      sub.frequency.exponentialRampToValueAtTime(30, now + 0.3);
-      subG.gain.setValueAtTime(0.0001, now);
-      subG.gain.exponentialRampToValueAtTime(0.8, now + 0.01);
-      subG.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
-      sub.connect(subG); subG.connect(ctx2.destination);
-      sub.start(now); sub.stop(now + 0.6);
-
-    } catch(e) {}
+    }, holdGolden);
   }
 
   function playScreamer() {

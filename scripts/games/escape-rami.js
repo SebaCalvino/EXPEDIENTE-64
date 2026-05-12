@@ -304,7 +304,7 @@ window.E64.buildEscapeRami = function(container) {
       window.E64.audio.playGoldenSound(1.0);
     }
     var screamOv = document.createElement('div');
-    screamOv.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;';
+    screamOv.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
     document.body.appendChild(screamOv);
     var screamImg = document.createElement('img');
     screamImg.src = 'assets/img/goldenRamiFrente.jpg';

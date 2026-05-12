@@ -4,11 +4,21 @@ window.E64.buildQuiz = function(container) {
   var body = container.querySelector('#quiz-body');
   var QS   = window.E64.QUIZ_QUESTIONS;
   var current=0, correct=0, timer=null, timeLeft=15;
+  /* Índice correcto tras barajar opciones en cada pregunta */
+  var quizShuffledCorrect = 0;
 
   function renderQuestion() {
     var q=QS[current];
+    var order = [0, 1, 2, 3];
+    for (var si = order.length - 1; si > 0; si--) {
+      var sj = Math.floor(Math.random() * (si + 1));
+      var swap = order[si]; order[si] = order[sj]; order[sj] = swap;
+    }
+    var shuffledOpts = order.map(function(oi) { return q.options[oi]; });
+    quizShuffledCorrect = order.indexOf(q.correct);
+
     var pct=(current/QS.length)*100;
-    body.innerHTML='<div class="quiz-progress"><div class="quiz-progress-fill" style="width:'+pct+'%"></div></div><div class="quiz-meta"><span>Pregunta '+(current+1)+' / '+QS.length+'</span><span>⏱ <b id="quiz-time">'+timeLeft+'</b>s</span></div><h3 class="quiz-question">'+q.q+'</h3><div class="quiz-options">'+q.options.map(function(o,i){return '<button class="quiz-option" data-i="'+i+'">'+o+'</button>';}).join('')+'</div><p class="quiz-feedback" id="quiz-fb"></p>';
+    body.innerHTML='<div class="quiz-progress"><div class="quiz-progress-fill" style="width:'+pct+'%"></div></div><div class="quiz-meta"><span>Pregunta '+(current+1)+' / '+QS.length+'</span><span>⏱ <b id="quiz-time">'+timeLeft+'</b>s</span></div><h3 class="quiz-question">'+q.q+'</h3><div class="quiz-options">'+shuffledOpts.map(function(o,i){return '<button class="quiz-option" data-i="'+i+'">'+o+'</button>';}).join('')+'</div><p class="quiz-feedback" id="quiz-fb"></p>';
     body.querySelectorAll('.quiz-option').forEach(function(btn){btn.onclick=function(){answer(parseInt(btn.dataset.i,10));};});
     timeLeft=15;
     if(timer)clearInterval(timer);
@@ -17,38 +27,24 @@ window.E64.buildQuiz = function(container) {
   function answer(i) {
     clearInterval(timer);
     var q=QS[current];
-    body.querySelectorAll('.quiz-option').forEach(function(o,idx){o.disabled=true;if(idx===q.correct)o.classList.add('correct');if(idx===i&&i!==q.correct)o.classList.add('wrong');});
-    if(i===q.correct)correct++;
+    body.querySelectorAll('.quiz-option').forEach(function(o,idx){o.disabled=true;if(idx===quizShuffledCorrect)o.classList.add('correct');if(idx===i&&i!==quizShuffledCorrect)o.classList.add('wrong');});
+    if(i===quizShuffledCorrect)correct++;
     body.querySelector('#quiz-fb').textContent=q.explanation;
     setTimeout(function(){current++;if(current>=QS.length)showResult();else renderQuestion();},1800);
   }
   function showQuizScreamer(onDone) {
-    var ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 40ms;pointer-events:none;';
-    document.body.appendChild(ov);
-
-    var img = document.createElement('img');
-    img.src = 'assets/img/goldenRamiFrente.jpg';
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
-    ov.appendChild(img);
-
-    if (window.E64.audio && window.E64.audio.playScreamerSound) window.E64.audio.playScreamerSound(0.9);
-
-    requestAnimationFrame(function() { ov.style.opacity = '1'; });
-    setTimeout(function() {
-      ov.style.transition = 'opacity 0.6s';
-      ov.style.opacity = '0';
-      setTimeout(function() {
-        if (ov.parentNode) ov.parentNode.removeChild(ov);
-        onDone();
-      }, 600);
-    }, 2400);
+    /* screamer.mp3 + overlay parpadeante (GoldenRamiManos + I SEE YOU) — ver playScreamerSound en audio.js */
+    if (window.E64.audio && window.E64.audio.playScreamerSound) {
+      window.E64.audio.playScreamerSound(0.9, onDone);
+    } else {
+      onDone();
+    }
   }
 
   function showResult() {
     /* Easter egg: 0/10 → screamer breve, después resultado normal */
     if (correct === 0 && window.E64.unlockEgg) {
-      window.E64.unlockEgg('rami_egg_quiz');
+      window.E64.unlockEgg('rami_egg_quiz', true);
       showQuizScreamer(function() { renderNormalResult(); });
       return;
     }
