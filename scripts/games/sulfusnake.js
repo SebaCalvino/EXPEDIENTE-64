@@ -131,7 +131,7 @@ window.E64.buildSulfusnake = function(container) {
     /* 1. Unlock easter egg */
     if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_snake', true);
 
-    /* 2. Solo GoldenSound.mp4 */
+    /* 2. GoldenSound audio INMEDIATO */
     if (window.E64.audio && window.E64.audio.playGoldenSound) {
       window.E64.audio.playGoldenSound(1.2);
     }

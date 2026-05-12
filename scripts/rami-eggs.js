@@ -333,44 +333,56 @@ window.E64 = window.E64 || {};
     if (window.E64._megaUnlockDone) return;
     window.E64._megaUnlockDone = true;
 
-    var FADE_MS = 4000;
-    var HOLD_MS = 10000;
-    var totalMs = FADE_MS + HOLD_MS + FADE_MS;
+    if (window.E64.audio && window.E64.audio.playScreamerSound) {
+      window.E64.audio.playScreamerSound(1.2);
+    }
 
     var overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;overflow:hidden;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;opacity:0;transition:opacity 0.4s;overflow:hidden;';
     document.body.appendChild(overlay);
+    requestAnimationFrame(function() { overlay.style.opacity = '1'; });
 
-    var img = document.createElement('img');
-    img.src = 'assets/img/RamiFrente.png';
-    img.draggable = false;
-    img.alt = '';
-    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:0;filter:brightness(0.26) contrast(1.35);';
-    overlay.appendChild(img);
-
-    requestAnimationFrame(function() {
+    setTimeout(function() {
+      var img = document.createElement('img');
+      img.src = 'assets/img/goldenRamiFrente.jpg';
+      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;filter:brightness(0.55) contrast(1.4);opacity:0;transition:opacity 1.2s;';
+      overlay.appendChild(img);
       requestAnimationFrame(function() {
-        var s = (FADE_MS / 1000) + 's';
-        overlay.style.transition = 'opacity ' + s + ' ease-in-out';
-        img.style.transition = 'opacity ' + s + ' ease-in-out';
-        overlay.style.opacity = '1';
-        img.style.opacity = '1';
+        requestAnimationFrame(function() { img.style.opacity = '1'; });
       });
-    });
 
+      var txt = document.createElement('div');
+      txt.style.cssText = 'position:absolute;bottom:12vh;left:0;right:0;text-align:center;font-family:"Special Elite",serif;font-size:clamp(0.9rem,2.5vw,1.4rem);color:rgba(201,48,44,0.85);letter-spacing:0.4em;text-transform:uppercase;opacity:0;transition:opacity 1s 0.8s;';
+      txt.textContent = 'EXPEDIENTE COMPLETO';
+      overlay.appendChild(txt);
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() { txt.style.opacity = '1'; });
+      });
+
+      /* Veil fades IN over image at t=2s, then OUT — 3s total pulse */
+      var veil = document.createElement('div');
+      veil.style.cssText = 'position:absolute;inset:0;background:#000;opacity:0;transition:opacity 1.5s;pointer-events:none;';
+      overlay.appendChild(veil);
+      setTimeout(function() {
+        veil.style.opacity = '1';
+        setTimeout(function() { veil.style.opacity = '0'; }, 1500);
+      }, 1600);
+
+    }, 400);
+
+    /* Outer overlay fades out at t=7s */
     setTimeout(function() {
+      overlay.style.transition = 'opacity 1.2s';
       overlay.style.opacity = '0';
-      img.style.opacity = '0';
-    }, FADE_MS + HOLD_MS);
-
-    setTimeout(function() {
-      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      if (window.E64.revealRamiCard) window.E64.revealRamiCard();
-      var btn = document.getElementById('rami-unlock-btn');
-      if (btn) { btn.style.display = 'block'; btn.style.animation = 'blink 0.8s step-end infinite'; }
-      var ramiCard = document.querySelector('.agent-card[data-agent="rami"]');
-      if (ramiCard) ramiCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, totalMs);
+      setTimeout(function() {
+        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        if (window.E64.revealRamiCard) window.E64.revealRamiCard();
+        var btn = document.getElementById('rami-unlock-btn');
+        if (btn) { btn.style.display = 'block'; btn.style.animation = 'blink 0.8s step-end infinite'; }
+        var ramiCard = document.querySelector('.agent-card[data-agent="rami"]');
+        if (ramiCard) ramiCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 1300);
+    }, 7000);
   }
 
 })();

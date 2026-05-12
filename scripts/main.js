@@ -573,7 +573,6 @@ function initEasterEggs() {
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami', true);
 
-  /* Golden Sound (mp4) — específico para konami */
   if (window.E64.audio && window.E64.audio.playGoldenSound) {
     window.E64.audio.playGoldenSound(1.0);
   }

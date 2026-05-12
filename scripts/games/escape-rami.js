@@ -46,7 +46,7 @@ window.E64.buildEscapeRami = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/ramiropita.png';
+    img.src = 'assets/img/goldenRamiFrente.jpg';
   })();
 
   /* AudioContext */
@@ -143,11 +143,12 @@ window.E64.buildEscapeRami = function(container) {
       var cur = queue.shift();
       var r = cur[0], c = cur[1];
       if (r === toR && c === toC) {
-        /* Reconstruct path */
+        /* Reconstruct path: build [firstStep, ..., target] */
         var path = [];
         var key = toR + ',' + toC;
         while (prev[key] !== null && prev[key] !== undefined) {
-          path.unshift(prev[key]);
+          var parts = key.split(',');
+          path.unshift([parseInt(parts[0], 10), parseInt(parts[1], 10)]);
           key = prev[key][0] + ',' + prev[key][1];
         }
         return path;
@@ -299,32 +300,27 @@ window.E64.buildEscapeRami = function(container) {
 
   function triggerCaught() {
     alive = false;
-    /* Golden Sound (mp4) + overlay fullscreen con goldenRamiFrente, sin texto */
     if (window.E64.audio && window.E64.audio.playGoldenSound) {
       window.E64.audio.playGoldenSound(1.0);
     }
-    var caughtOv = document.createElement('div');
-    caughtOv.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
-    var caughtImg = document.createElement('img');
-    caughtImg.src = 'assets/img/goldenRamiFrente.jpg';
-    caughtImg.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
-    caughtOv.appendChild(caughtImg);
-    document.body.appendChild(caughtOv);
-    requestAnimationFrame(function() { caughtOv.style.opacity = '1'; });
-    var holdGolden = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
+    var screamOv = document.createElement('div');
+    screamOv.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
+    document.body.appendChild(screamOv);
+    var screamImg = document.createElement('img');
+    screamImg.src = 'assets/img/goldenRamiFrente.jpg';
+    screamImg.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
+    screamOv.appendChild(screamImg);
+    requestAnimationFrame(function() { screamOv.style.opacity = '1'; });
     setTimeout(function() {
-      caughtOv.style.transition = 'opacity 0.5s';
-      caughtOv.style.opacity = '0';
+      screamOv.style.transition = 'opacity 0.6s';
+      screamOv.style.opacity = '0';
       setTimeout(function() {
-        if (caughtOv.parentNode) caughtOv.parentNode.removeChild(caughtOv);
+        if (screamOv.parentNode) screamOv.parentNode.removeChild(screamOv);
+        titleEl.textContent = 'TE ATRAPÓ';
+        msgEl.textContent = 'Rami Pita te encontró. Tiempo: ' + elapsed + 's';
+        overlay.classList.add('show');
       }, 600);
-    }, holdGolden);
-    /* Mostrar pantalla de game-over después de que desaparece el overlay */
-    setTimeout(function() {
-      titleEl.textContent = 'TE ATRAPÓ';
-      msgEl.textContent = 'Rami Pita te encontró. Tiempo: ' + elapsed + 's';
-      overlay.classList.add('show');
-    }, holdGolden + 900);
+    }, 2400);
   }
 
   function triggerEscape() {

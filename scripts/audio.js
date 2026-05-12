@@ -597,6 +597,7 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
     playScreamer:    playScreamer,
     playScreamerSound: playScreamerSound,
     playGoldenSound: playGoldenSound,
+    showISeeYou:     showISeeYou,
     playClick:       playClick,
     playUnlock:      playUnlock,
     playStamp:       playStamp,
