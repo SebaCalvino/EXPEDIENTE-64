@@ -311,19 +311,20 @@ window.E64.buildEscapeRami = function(container) {
     caughtOv.appendChild(caughtImg);
     document.body.appendChild(caughtOv);
     requestAnimationFrame(function() { caughtOv.style.opacity = '1'; });
+    var holdGolden = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
     setTimeout(function() {
       caughtOv.style.transition = 'opacity 0.5s';
       caughtOv.style.opacity = '0';
       setTimeout(function() {
         if (caughtOv.parentNode) caughtOv.parentNode.removeChild(caughtOv);
       }, 600);
-    }, 2400);
+    }, holdGolden);
     /* Mostrar pantalla de game-over después de que desaparece el overlay */
     setTimeout(function() {
       titleEl.textContent = 'TE ATRAPÓ';
       msgEl.textContent = 'Rami Pita te encontró. Tiempo: ' + elapsed + 's';
       overlay.classList.add('show');
-    }, 3100);
+    }, holdGolden + 900);
   }
 
   function triggerEscape() {
