@@ -28,7 +28,7 @@ window.E64.buildQuiz = function(container) {
     document.body.appendChild(ov);
 
     var img = document.createElement('img');
-    img.src = 'assets/img/goldenRamiFrente.png';
+    img.src = 'assets/img/goldenRamiFrente.jpg';
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
     ov.appendChild(img);
 

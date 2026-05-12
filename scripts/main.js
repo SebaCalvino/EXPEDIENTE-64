@@ -573,11 +573,9 @@ function initEasterEggs() {
 function showRamiKonami() {
   if (window.E64.unlockEgg) window.E64.unlockEgg('rami_egg_konami');
 
-  /* Golden Freddy sound — INMEDIATO, sin overlay duplicado */
-  if (window.E64.audio && window.E64.audio.playScreamerSound) {
-    window.E64.audio.playScreamerSound(1.0);
-  } else if (window.E64.audio) {
-    window.E64.audio.playScreamerSound && window.E64.audio.playScreamerSound(1.0);
+  /* Golden Sound (mp4) — específico para konami */
+  if (window.E64.audio && window.E64.audio.playGoldenSound) {
+    window.E64.audio.playGoldenSound(1.0);
   }
 
   /* Fullscreen overlay: goldenRamiFrente estático, sin texto */
@@ -586,7 +584,7 @@ function showRamiKonami() {
   document.body.appendChild(overlay);
 
   var img = document.createElement('img');
-  img.src = 'assets/img/goldenRamiFrente.png';
+  img.src = 'assets/img/goldenRamiFrente.jpg';
   img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
   overlay.appendChild(img);
 
@@ -644,7 +642,7 @@ function triggerTimeline1991Egg(polaroid) {
   if (!imgEl) return;
   var orig = imgEl.innerHTML;
   /* Replace with Rami image briefly */
-  imgEl.innerHTML = '<img src="assets/img/goldenRama1.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
+  imgEl.innerHTML = '<img src="assets/img/ramapita2.png" style="width:100%;height:100%;object-fit:cover;filter:contrast(1.4) saturate(0.15) brightness(0.6) sepia(0.5);">';
   if (window.E64.audio) window.E64.audio.playGlitch();
   var caption = polaroid.querySelector('.polaroid-title');
   var origTitle = caption ? caption.textContent : '';

@@ -116,7 +116,7 @@
     scheduleNext();
   }
 
-  var ramiPhotos = ['assets/img/goldenRami.png','assets/img/goldenRama1.png','assets/img/ramapita2.png'];
+  var ramiPhotos = ['assets/img/goldenRamiFrente.jpg','assets/img/ramapita2.png','assets/img/ramapita3.png'];
   function triggerSubliminale() {
     var flash = document.getElementById('subliminal-flash');
     if (!flash) return;

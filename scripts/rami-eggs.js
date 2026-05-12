@@ -193,7 +193,7 @@ window.E64 = window.E64 || {};
       /* Show Rami for 0.2s */
       if (document.querySelector('img[src*="ramapita"]') || true) {
         var img = document.createElement('img');
-        img.src = 'assets/img/goldenRamiFrente.png';
+        img.src = 'assets/img/goldenRamiFrente.jpg';
         img.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:99998;pointer-events:none;filter:contrast(1.3) brightness(0.9);';
         document.body.appendChild(img);
         setTimeout(function() {
@@ -253,8 +253,8 @@ window.E64 = window.E64 || {};
         ramiPending = null;
         if (isUnlocked('rami_egg_console')) return;
         consoleBuffer = '';
-        if (window.E64.audio && window.E64.audio.playScreamerSound) {
-          window.E64.audio.playScreamerSound(0.7);
+        if (window.E64.audio && window.E64.audio.playGoldenSound) {
+          window.E64.audio.playGoldenSound(0.9);
         }
         window.E64.unlockEgg('rami_egg_console');
       }, 700);
@@ -346,7 +346,7 @@ window.E64 = window.E64 || {};
     /* 3. Dark photo fade in with low brightness */
     setTimeout(function() {
       var img = document.createElement('img');
-      img.src = 'assets/img/goldenRamiFrente.png';
+      img.src = 'assets/img/goldenRamiFrente.jpg';
       img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;filter:brightness(0.25) contrast(1.4);opacity:0;transition:opacity 2s;';
       overlay.appendChild(img);
       requestAnimationFrame(function() {

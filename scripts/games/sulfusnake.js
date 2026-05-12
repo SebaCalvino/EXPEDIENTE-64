@@ -54,7 +54,7 @@ window.E64.buildSulfusnake = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/goldenRami.png';
+    img.src = 'assets/img/ramapita2.png';
   })();
 
   function reset() {
@@ -143,7 +143,7 @@ window.E64.buildSulfusnake = function(container) {
     document.body.appendChild(overlay2);
 
     var img2 = document.createElement('img');
-    img2.src = 'assets/img/goldenRamiFrente.png';
+    img2.src = 'assets/img/goldenRamiFrente.jpg';
     img2.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
     overlay2.appendChild(img2);
 
