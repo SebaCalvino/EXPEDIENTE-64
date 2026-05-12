@@ -46,7 +46,7 @@ window.E64.buildEscapeRami = function(container) {
   (function() {
     var img = new Image();
     img.onload = function() { ramiImg = img; };
-    img.src = 'assets/img/goldenRami.png';
+    img.src = 'assets/img/ramiropita.png';
   })();
 
   /* AudioContext */
@@ -299,14 +299,31 @@ window.E64.buildEscapeRami = function(container) {
 
   function triggerCaught() {
     alive = false;
-    /* audio.js maneja el overlay "I SEE YOU" (negro + texto, 3s) + Golden Freddy MP3 */
-    if (window.E64.audio) window.E64.audio.playScreamer(1.0);
-    /* Mostrar pantalla de game-over después de que desaparece el overlay (~3.3s) */
+    /* Golden Sound (mp4) + overlay fullscreen con goldenRamiFrente, sin texto */
+    if (window.E64.audio && window.E64.audio.playGoldenSound) {
+      window.E64.audio.playGoldenSound(1.0);
+    }
+    var caughtOv = document.createElement('div');
+    caughtOv.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
+    var caughtImg = document.createElement('img');
+    caughtImg.src = 'assets/img/goldenRamiFrente.jpg';
+    caughtImg.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
+    caughtOv.appendChild(caughtImg);
+    document.body.appendChild(caughtOv);
+    requestAnimationFrame(function() { caughtOv.style.opacity = '1'; });
+    setTimeout(function() {
+      caughtOv.style.transition = 'opacity 0.5s';
+      caughtOv.style.opacity = '0';
+      setTimeout(function() {
+        if (caughtOv.parentNode) caughtOv.parentNode.removeChild(caughtOv);
+      }, 600);
+    }, 2400);
+    /* Mostrar pantalla de game-over después de que desaparece el overlay */
     setTimeout(function() {
       titleEl.textContent = 'TE ATRAPÓ';
       msgEl.textContent = 'Rami Pita te encontró. Tiempo: ' + elapsed + 's';
       overlay.classList.add('show');
-    }, 3300);
+    }, 3100);
   }
 
   function triggerEscape() {

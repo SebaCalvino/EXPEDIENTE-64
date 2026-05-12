@@ -143,13 +143,18 @@ window.E64 = window.E64 || {};
   }
 
   /* ──────────────────────────────────────────
-     SCREAMER — Golden Freddy MP3 + "I SEE YOU"
+     SCREAMER — Golden Freddy MP3 + Golden Sound MP4
   ────────────────────────────────────────── */
   var screamerAudio = null;
+  var goldenAudio = null;
   (function() {
     try {
       screamerAudio = new Audio('assets/audio/screamer.mp3');
       screamerAudio.preload = 'auto';
+    } catch(e) {}
+    try {
+      goldenAudio = new Audio('assets/audio/GoldenSound.mp4');
+      goldenAudio.preload = 'auto';
     } catch(e) {}
   })();
 
@@ -163,7 +168,7 @@ window.E64 = window.E64 || {};
     document.body.appendChild(overlay);
 
     var img = document.createElement('img');
-    img.src = 'assets/img/goldenRamiFrente.png';
+    img.src = 'assets/img/goldenRamiFrente.jpg';
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
     overlay.appendChild(img);
 
@@ -191,6 +196,26 @@ window.E64 = window.E64 || {};
           if (screamerAudio && !screamerAudio.paused) {
             screamerAudio.pause();
             screamerAudio.currentTime = 0;
+          }
+        }, 4000);
+      } catch(e) {}
+    }
+  }
+
+  /* Golden Sound — para konami, rami input, y captura en escape-rami */
+  function playGoldenSound(intensity) {
+    if (muted) return;
+    intensity = intensity || 1;
+    if (goldenAudio) {
+      try {
+        goldenAudio.pause();
+        goldenAudio.currentTime = 0;
+        goldenAudio.volume = Math.min(1, 0.95 * intensity);
+        goldenAudio.play().catch(function() {});
+        setTimeout(function() {
+          if (goldenAudio && !goldenAudio.paused) {
+            goldenAudio.pause();
+            goldenAudio.currentTime = 0;
           }
         }, 4000);
       } catch(e) {}
@@ -323,6 +348,7 @@ window.E64 = window.E64 || {};
     unlock:          unlockOnGesture,
     playScreamer:    playScreamer,
     playScreamerSound: playScreamerSound,
+    playGoldenSound: playGoldenSound,
     playClick:       playClick,
     playUnlock:      playUnlock,
     playStamp:       playStamp,
