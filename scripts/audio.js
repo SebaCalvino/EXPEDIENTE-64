@@ -189,8 +189,8 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
     }
   }
 
-  /* Overlay screamer.mp3: ~5 s máximo, una imagen manos (~1 s por aparición, ritmo variable), un solo "I SEE YOU" que salta sin acumular capas. */
-  var SCREAMER_JUMPSCARE_MS = 5000;
+  /* Overlay screamer.mp3: 3 flashes de imagen alternando con "I SEE YOU", total ~4s. */
+  var SCREAMER_JUMPSCARE_MS = 4500;
 
   function startScreamerJumpscareVisual() {
     tearDownScreamerJumpscare();
@@ -219,12 +219,12 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
     hands.alt = '';
     hands.draggable = false;
     hands.style.cssText = [
-      'width:min(92vw,92vh)',
-      'height:min(92vw,92vh)',
+      'width:min(88vw,88vh)',
+      'height:min(88vw,88vh)',
       'object-fit:contain',
       'filter:contrast(1.2) brightness(0.88)',
       'opacity:0',
-      'transition:opacity 0.08s linear',
+      'transition:opacity 0.07s linear',
       'pointer-events:none'
     ].join(';');
     imgWrap.appendChild(hands);
@@ -234,14 +234,12 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
     isee.textContent = 'I SEE YOU';
     isee.style.cssText = [
       'position:absolute',
-      'left:10%',
-      'top:12%',
       'font-family:Impact,Haettenschweiler,sans-serif',
       'font-weight:900',
-      'font-size:clamp(1.1rem,4.2vw,2.6rem)',
+      'font-size:clamp(1.4rem,5vw,3.2rem)',
       'letter-spacing:0.14em',
-      'color:rgba(210,45,45,0.92)',
-      'text-shadow:0 0 8px #000,0 0 22px rgba(201,48,44,0.75)',
+      'color:rgba(210,45,45,0.95)',
+      'text-shadow:0 0 10px #000,0 0 28px rgba(201,48,44,0.8)',
       'white-space:nowrap',
       'opacity:0',
       'transition:opacity 0.06s linear',
@@ -254,41 +252,41 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
       return !!screamerJumpscareRoot && screamerJumpscareRoot === root && document.body.contains(root);
     }
 
-    function handsPulse() {
-      if (!isJumpscareLive()) return;
-      var onMs = 850 + Math.floor(Math.random() * 320);
-      var gapBefore = 120 + Math.floor(Math.random() * 520);
+    /* Deterministic sequence: image × 3 alternating with "I SEE YOU" × 3 */
+    /* [type, startMs, durationMs] */
+    var seq = [
+      ['img',  0,    750],
+      ['text', 900,  380],
+      ['img',  1380, 750],
+      ['text', 2250, 380],
+      ['img',  2730, 750],
+      ['text', 3600, 400]
+    ];
+
+    seq.forEach(function(step) {
+      var type = step[0], start = step[1], dur = step[2];
+      var positions = [
+        [8, 10], [55, 10], [8, 72], [55, 72], [28, 40]
+      ];
+      var pos = positions[Math.floor(Math.random() * positions.length)];
+
       screamerJumpscareHandT = setTimeout(function() {
         if (!isJumpscareLive()) return;
-        hands.style.opacity = '1';
-        screamerJumpscareHandT = setTimeout(function() {
-          if (!isJumpscareLive()) return;
-          hands.style.opacity = '0';
-          screamerJumpscareHandT = setTimeout(handsPulse, 80 + Math.floor(Math.random() * 380));
-        }, onMs);
-      }, gapBefore);
-    }
-
-    function textFlash() {
-      if (!isJumpscareLive()) return;
-      var gap = 100 + Math.floor(Math.random() * 420);
-      screamerJumpscareTextT = setTimeout(function() {
-        if (!isJumpscareLive()) return;
-        isee.style.left = (4 + Math.random() * 72) + '%';
-        isee.style.top = (6 + Math.random() * 68) + '%';
-        isee.style.transform = 'rotate(' + (Math.random() * 20 - 10) + 'deg)';
-        isee.style.opacity = '1';
-        var flashMs = 140 + Math.floor(Math.random() * 220);
+        if (type === 'img') {
+          hands.style.opacity = '1';
+        } else {
+          isee.style.left  = pos[0] + '%';
+          isee.style.top   = pos[1] + '%';
+          isee.style.transform = 'rotate(' + (Math.random() * 14 - 7) + 'deg)';
+          isee.style.opacity = '1';
+        }
         screamerJumpscareTextT = setTimeout(function() {
           if (!isJumpscareLive()) return;
-          isee.style.opacity = '0';
-          screamerJumpscareTextT = setTimeout(textFlash, 60 + Math.floor(Math.random() * 280));
-        }, flashMs);
-      }, gap);
-    }
-
-    handsPulse();
-    textFlash();
+          if (type === 'img') hands.style.opacity = '0';
+          else isee.style.opacity = '0';
+        }, dur);
+      }, start);
+    });
   }
 
   function showISeeYou() {

@@ -11,7 +11,7 @@ window.E64.buildEscapeRami = function(container) {
           '<span id="esc-status" style="color:#888">BUSCÁ LA SALIDA</span>',
         '</div>',
         '<div style="position:relative">',
-          '<canvas id="esc-canvas" class="game-canvas" width="500" height="500"></canvas>',
+          '<canvas id="esc-canvas" class="game-canvas" width="480" height="480"></canvas>',
           '<div class="game-overlay" id="esc-over" style="background:rgba(60,0,0,0.97)">',
             '<h3 id="esc-title" style="color:#C9302C">TE ATRAPÓ</h3>',
             '<p id="esc-msg" style="color:#ff4444">Rami Pita te encontró.</p>',
@@ -31,7 +31,7 @@ window.E64.buildEscapeRami = function(container) {
   var canvas = container.querySelector('#esc-canvas');
   var ctx = canvas.getContext('2d');
   var W = canvas.width, H = canvas.height;
-  var CELL = 20, COLS = W / CELL, ROWS = H / CELL;
+  var CELL = 12, COLS = W / CELL, ROWS = H / CELL;
 
   var overlay = container.querySelector('#esc-over');
   var titleEl = container.querySelector('#esc-title');
@@ -117,6 +117,20 @@ window.E64.buildEscapeRami = function(container) {
       });
     }
     carve(0, 0);
+    // Add loops to create multiple paths
+    var loopPct = 0.18;
+    for (var lr = 0; lr < ROWS; lr++) {
+      for (var lc = 0; lc < COLS; lc++) {
+        if (lc + 1 < COLS && grid[lr][lc].walls[1] && Math.random() < loopPct) {
+          grid[lr][lc].walls[1] = false;
+          grid[lr][lc + 1].walls[3] = false;
+        }
+        if (lr + 1 < ROWS && grid[lr][lc].walls[2] && Math.random() < loopPct) {
+          grid[lr][lc].walls[2] = false;
+          grid[lr + 1][lc].walls[0] = false;
+        }
+      }
+    }
     return grid;
   }
 
@@ -189,12 +203,12 @@ window.E64.buildEscapeRami = function(container) {
 
     /* Heartbeat when Rami is close */
     var dist = Math.abs(rami.r - player.r) + Math.abs(rami.c - player.c);
-    if (dist < 5 && t - heartbeatTimer > 800) {
+    if (dist < 6 && t - heartbeatTimer > 600) {
       heartbeatTimer = t;
       playHeartbeat();
-      statusEl.textContent = dist < 3 ? '⚠ ESTÁ MUY CERCA' : '⚠ SE ACERCA';
-      statusEl.style.color = '#C9302C';
-    } else if (dist >= 5) {
+      statusEl.textContent = dist < 2 ? '⚠⚠ ESTÁ ENCIMA TUYO ⚠⚠' : dist < 4 ? '⚠ ESTÁ MUY CERCA' : '⚠ SE ACERCA';
+      statusEl.style.color = dist < 2 ? '#ff2222' : '#C9302C';
+    } else if (dist >= 6) {
       statusEl.textContent = 'BUSCÁ LA SALIDA';
       statusEl.style.color = '#888';
     }
@@ -289,8 +303,8 @@ window.E64.buildEscapeRami = function(container) {
     for (var fr = 0; fr < ROWS; fr++) {
       for (var fc = 0; fc < COLS; fc++) {
         var d = Math.abs(fr - player.r) + Math.abs(fc - player.c);
-        if (d > 8) {
-          var alpha = Math.min(0.75, (d - 8) * 0.1);
+        if (d > 4) {
+          var alpha = Math.min(0.88, (d - 4) * 0.15);
           ctx.fillStyle = 'rgba(0,0,0,' + alpha + ')';
           ctx.fillRect(fc * CELL, fr * CELL, CELL, CELL);
         }
