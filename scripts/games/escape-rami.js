@@ -118,7 +118,7 @@ window.E64.buildEscapeRami = function(container) {
     }
     carve(0, 0);
     // Add loops to create multiple paths
-    var loopPct = 0.18;
+    var loopPct = 0.40;
     for (var lr = 0; lr < ROWS; lr++) {
       for (var lc = 0; lc < COLS; lc++) {
         if (lc + 1 < COLS && grid[lr][lc].walls[1] && Math.random() < loopPct) {

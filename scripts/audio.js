@@ -295,7 +295,7 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
 
     var overlay = document.createElement('div');
     overlay.id = 'e64-isee-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;transition:opacity 40ms;';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;pointer-events:none;background:#000;opacity:0;';
     document.body.appendChild(overlay);
 
     var img = document.createElement('img');
@@ -303,16 +303,17 @@ window.E64.GOLDEN_SCREAMER_HOLD_MS = 10000;
     img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center top;filter:contrast(1.3) brightness(0.9);';
     overlay.appendChild(img);
 
-    requestAnimationFrame(function() { overlay.style.opacity = '1'; });
-
-    var holdMs = (window.E64 && window.E64.GOLDEN_SCREAMER_HOLD_MS) || 10000;
-    setTimeout(function() {
-      overlay.style.transition = 'opacity 0.5s';
-      overlay.style.opacity = '0';
+    /* 3 rapid flashes — show 180ms, gap 110ms, ×3, then gone */
+    var times = [0, 180, 290, 470, 580, 760];
+    var visible = [1, 0, 1, 0, 1, 0];
+    times.forEach(function(t, i) {
       setTimeout(function() {
-        if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      }, 600);
-    }, holdMs);
+        if (overlay.parentNode) overlay.style.opacity = visible[i];
+      }, t);
+    });
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 960);
   }
 
   function playScreamerSound(intensity, onEnded) {
